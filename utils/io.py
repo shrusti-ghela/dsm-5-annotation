@@ -6,8 +6,8 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 TAXONOMY_PATH = ROOT / "taxonomy" / "dsm_categories.json"
-INPUT_PATH = DATA_DIR / "input_messages.csv"
-ANNOTATION_PATH = DATA_DIR / "annotations.csv"
+INPUT_PATH = DATA_DIR / "input_messages_v2.csv"
+ANNOTATION_PATH = DATA_DIR / "annotations_v2.csv"
 FINAL_LABELS_PATH = DATA_DIR / "final_labels.csv"
 
 ANNOTATION_COLUMNS = [
