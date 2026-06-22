@@ -2,7 +2,7 @@ import html
 import json
 import streamlit as st
 
-from utils.styles import apply_styles, hero, card, pills
+from utils.styles import apply_styles, hero, card
 from utils.io import (
     load_messages,
     load_annotations,
@@ -76,7 +76,7 @@ ALLOWED_EXPERT_IDS = {
     "u1655162",
     "1",
     "2",
-    "3"
+    "3",
 }
 
 ANNOTATIONS_REQUIRED_PER_MESSAGE = 3
@@ -86,7 +86,6 @@ ANNOTATOR_IDS = sorted(list(ALLOWED_EXPERT_IDS))
 def get_assigned_annotators(message_index):
     start = message_index % len(ANNOTATOR_IDS)
 
-    
     return [
         ANNOTATOR_IDS[(start + offset) % len(ANNOTATOR_IDS)]
         for offset in range(ANNOTATIONS_REQUIRED_PER_MESSAGE)
@@ -95,7 +94,7 @@ def get_assigned_annotators(message_index):
 
 messages = messages.copy()
 messages["message_id"] = messages["message_id"].astype(str)
-messages = messages.reset_index(drop=True)
+messages = messages.drop_duplicates(subset=["message_id"]).reset_index(drop=True)
 
 assignment_lookup = {}
 
@@ -103,87 +102,96 @@ for idx, row in messages.iterrows():
     message_id = str(row["message_id"])
     assignment_lookup[message_id] = get_assigned_annotators(idx)
 
-# -----------------------------------
-# DEBUG: check assignment balance
-# -----------------------------------
-
-assignment_counts = {a: 0 for a in ANNOTATOR_IDS}
-
-for annotators in assignment_lookup.values():
-    for a in annotators:
-        assignment_counts[a] += 1
-
-print("Assignment counts:")
-print(assignment_counts)
-
-with st.sidebar:
-    st.header("Annotator")
-
-    annotator_id = st.text_input(
-        "Expert ID",
-        placeholder="expert_01",
-    )
-
-
-
-if not annotator_id:
-    st.warning("Enter an Expert ID in the sidebar to begin.")
-    st.stop()
-
-annotator_id = annotator_id.strip()
-
-if annotator_id not in ALLOWED_EXPERT_IDS:
-    st.error("Invalid Expert ID. Please check your assigned Expert ID and try again.")
-    st.stop()
-
-assigned_message_ids = {
-    message_id
-    for message_id, assigned_annotators in assignment_lookup.items()
-    if annotator_id in assigned_annotators
-}
-
 if not annotations.empty:
     annotations = annotations.copy()
     annotations["message_id"] = annotations["message_id"].astype(str)
     annotations["annotator_id"] = annotations["annotator_id"].astype(str)
 
-    annotated_by_user = set(
-        annotations.loc[
-            annotations["annotator_id"] == str(annotator_id),
-            "message_id",
-        ]
-    )
-else:
-    annotated_by_user = set()
-
-completed_count = len(assigned_message_ids.intersection(annotated_by_user))
-assigned_count = len(assigned_message_ids)
-remaining_count = max(assigned_count - completed_count, 0)
-
 with st.sidebar:
-    st.metric("Completed", completed_count)
-    st.metric("Remaining", remaining_count)
-    st.metric("Assigned total", assigned_count)
+    st.header("Mode")
+
+    mode = st.radio(
+        "Choose mode",
+        ["Annotation", "Review"],
+        label_visibility="collapsed",
+    )
 
     st.divider()
 
-    st.header("Admin View")
+    if mode == "Annotation":
+        st.header("Annotator")
+        annotator_id = st.text_input("Expert ID", placeholder="expert_01")
+        is_admin = False
 
-    admin_password = st.text_input(
-        "Admin Password",
-        type="password",
+    else:
+        st.header("Review")
+        admin_password = st.text_input("Admin Password", type="password")
+        is_admin = admin_password == ADMIN_PASSWORD
+        annotator_id = ""
+
+
+if mode == "Annotation":
+    if not annotator_id:
+        st.warning("Enter an Expert ID in the sidebar to begin.")
+        st.stop()
+
+    annotator_id = annotator_id.strip()
+
+    if annotator_id not in ALLOWED_EXPERT_IDS:
+        st.error("Invalid Expert ID. Please check your assigned Expert ID and try again.")
+        st.stop()
+
+    assigned_message_ids = {
+        message_id
+        for message_id, assigned_annotators in assignment_lookup.items()
+        if annotator_id in assigned_annotators
+    }
+
+    annotated_by_user = (
+        set(
+            annotations.loc[
+                annotations["annotator_id"] == str(annotator_id),
+                "message_id",
+            ]
+        )
+        if not annotations.empty
+        else set()
     )
 
-    is_admin = admin_password == ADMIN_PASSWORD
+    completed_count = len(assigned_message_ids.intersection(annotated_by_user))
+    assigned_count = len(assigned_message_ids)
+    remaining_count = max(assigned_count - completed_count, 0)
 
-pool = messages[
-    messages["message_id"].isin(assigned_message_ids)
-    & ~messages["message_id"].isin(annotated_by_user)
-].copy()
+    with st.sidebar:
+        st.metric("Completed", completed_count)
+        st.metric("Remaining", remaining_count)
+        st.metric("Assigned total", assigned_count)
 
-if pool.empty:
-    st.success("You have completed all assigned messages.")
-    st.stop()
+    pool = messages[
+        messages["message_id"].isin(assigned_message_ids)
+        & ~messages["message_id"].isin(annotated_by_user)
+    ].copy()
+
+    if pool.empty:
+        st.success("You have completed all assigned messages.")
+        st.stop()
+
+else:
+    if not is_admin:
+        st.warning("Enter the admin password in the sidebar to review all samples.")
+        st.stop()
+
+    with st.sidebar:
+        st.metric("Total samples", len(messages))
+        st.metric("Total annotations", len(annotations))
+
+    pool = messages.copy()
+
+    st.info(
+        "Admin review mode: you can view all samples, metadata, and prior annotations. "
+        "Annotation controls are disabled."
+    )
+
 
 pool_ids = pool["message_id"].astype(str).tolist()
 
@@ -198,14 +206,71 @@ current = pool[
     pool["message_id"].astype(str) == st.session_state.current_message_id
 ].iloc[0]
 
-left, right = st.columns([2.15, 1])
+safe_msg = html.escape(str(current["first_user_message"]))
+card(f"<h3>First User Message</h3><p>{safe_msg}</p>", "user-card")
 
-with left:
-    safe_msg = html.escape(str(current["first_user_message"]))
-    card(f"<h3>First User Message</h3><p>{safe_msg}</p>", "user-card")
 
+if mode == "Review":
+    current_idx = pool_ids.index(str(current["message_id"]))
+
+    prior = (
+        annotations[
+            annotations["message_id"].astype(str) == str(current["message_id"])
+        ]
+        if not annotations.empty
+        else annotations
+    )
+
+    assigned_for_current = assignment_lookup.get(
+        str(current["message_id"]),
+        [],
+    )
+
+    st.subheader("Annotations")
+
+    if prior.empty:
+            card("No prior annotations for this message yet.", "info-card")
+    else:
+            visible_cols = [
+                col
+                for col in [
+                    "message_id", 
+                    "annotator_id",
+                    "labels",
+                    "category_decisions",
+                    "notes",
+                    "timestamp",
+                ]
+                if col in prior.columns
+            ]
+
+            st.dataframe(
+                prior[visible_cols],
+                use_container_width=True,
+                hide_index=True,
+            )
+
+    nav1, nav2 = st.columns(2)
+
+    if nav1.button("Previous", use_container_width=True):
+        st.session_state.current_message_id = pool_ids[
+            (current_idx - 1) % len(pool_ids)
+        ]
+        st.rerun()
+
+    if nav2.button("Next", use_container_width=True):
+        st.session_state.current_message_id = pool_ids[
+            (current_idx + 1) % len(pool_ids)
+        ]
+        st.rerun()
+
+
+else:
     st.subheader("DSM-5 categories")
-    st.caption("Answer Yes / No / Maybe for every category before moving next.")
+    st.caption(
+        "Answer Yes / No / Maybe for every category before moving to the next message. "
+        "Use Maybe only if you are unsure."
+    )
 
     category_decisions = {}
     selected_labels = []
@@ -277,63 +342,3 @@ with left:
                 st.session_state.current_message_id = None
 
             st.rerun()
-
-with right:
-    if selected_labels:
-        readable = [label_lookup.get(x, x) for x in selected_labels]
-        st.markdown("**Selected Yes labels**", unsafe_allow_html=True)
-        st.markdown(pills(readable), unsafe_allow_html=True)
-
-    prior = annotations[
-        annotations["message_id"].astype(str) == str(current["message_id"])
-    ] if not annotations.empty else annotations
-
-    if is_admin:
-        st.subheader("Admin metadata")
-
-        meta_rows = []
-
-        for col in current.index:
-            if col != "first_user_message":
-                meta_rows.append(
-                    f"<p><b>{html.escape(str(col))}:</b> "
-                    f"{html.escape(str(current[col]))}</p>"
-                )
-
-        assigned_for_current = assignment_lookup.get(
-            str(current["message_id"]),
-            [],
-        )
-
-        meta_rows.append(
-            f"<p><b>Assigned annotators:</b> {html.escape(', '.join(assigned_for_current))}</p>"
-        )
-
-        card("<h3>Message Metadata</h3>" + "".join(meta_rows), "info-card")
-
-        st.divider()
-
-        st.subheader("Other annotators")
-
-        if prior.empty:
-            st.info("No prior annotations for this message yet.")
-        else:
-            visible_cols = [
-                col
-                for col in [
-                    "annotator_id",
-                    "labels",
-                    "category_decisions",
-                    "notes",
-                    "timestamp",
-                ]
-                if col in prior.columns
-            ]
-
-            st.dataframe(
-                prior[visible_cols],
-                use_container_width=True,
-                hide_index=True,
-            )
-    else:
-        st.info("Enter admin password to view metadata and prior annotations.")
