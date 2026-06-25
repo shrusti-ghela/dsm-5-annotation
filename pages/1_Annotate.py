@@ -387,8 +387,44 @@ else:
     next_clicked = st.button("Next", type="primary", use_container_width=True)
 
     if next_clicked:
-        if "OUT_OF_SCOPE" in selected_labels and len(selected_labels) > 1:
-            st.error("OUT_OF_SCOPE should not be marked Yes with any in-scope category.")
+        yes_labels = [
+            category_id
+            for category_id, decision in category_decisions.items()
+            if decision == "Yes"
+        ]
+
+        maybe_labels = [
+            category_id
+            for category_id, decision in category_decisions.items()
+            if decision == "Maybe"
+        ]
+
+        selected_or_maybe_labels = yes_labels + maybe_labels
+
+        fallback_labels = {"GENERAL_LIFE_HELP_SEEKING", "OUT_OF_SCOPE"}
+        selected_fallbacks = [
+            label for label in selected_or_maybe_labels if label in fallback_labels
+        ]
+
+        selected_primary_labels = [
+            label for label in selected_or_maybe_labels if label not in fallback_labels
+        ]
+
+        if not selected_or_maybe_labels:
+            st.error(
+                "Please select at least one category as Yes or Maybe. "
+                "If none of the contextual categories apply, select General Life Help-Seeking or Out of Scope."
+            )
+
+        elif selected_primary_labels and selected_fallbacks:
+            st.error(
+                "General Life Help-Seeking and Out of Scope should only be used when none of the other contextual categories apply."
+            )
+
+        elif len(selected_fallbacks) > 1:
+            st.error(
+                "General Life Help-Seeking and Out of Scope are mutually exclusive. Please select only one."
+            )
 
         else:
             row = {
@@ -396,7 +432,7 @@ else:
                 "conversation_id": str(current.get("conversation_id", "")),
                 "first_user_message": str(current.get("first_user_message", "")),
                 "annotator_id": str(annotator_id),
-                "labels": ";".join(selected_labels),
+                "labels": ";".join(yes_labels),
                 "category_decisions": json.dumps(category_decisions),
                 "notes": notes,
                 "timestamp": utc_now_iso(),
@@ -409,9 +445,8 @@ else:
                 x for x in pool_ids if x != str(current["message_id"])
             ]
 
-            if remaining_ids:
-                st.session_state.current_message_id = remaining_ids[0]
-            else:
-                st.session_state.current_message_id = None
+            st.session_state.current_message_id = (
+                remaining_ids[0] if remaining_ids else None
+            )
 
             st.rerun()
