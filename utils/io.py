@@ -9,6 +9,7 @@ TAXONOMY_PATH = ROOT / "taxonomy" / "dsm_categories.json"
 INPUT_PATH = DATA_DIR / "input_messages_v2.csv"
 ANNOTATION_PATH = DATA_DIR / "annotations_v2.csv"
 FINAL_LABELS_PATH = DATA_DIR / "final_labels.csv"
+ACK_PATH = DATA_DIR / "acknowledgements.jsonl"
 
 ANNOTATION_COLUMNS = [
     "message_id",
@@ -23,7 +24,27 @@ ANNOTATION_COLUMNS = [
     "taxonomy_version",
 ]
 
+def load_acknowledgements():
+    if not ACK_PATH.exists():
+        return set()
 
+    acknowledged = set()
+
+    with ACK_PATH.open("r", encoding="utf-8") as f:
+        for line in f:
+            if line.strip():
+                row = json.loads(line)
+                acknowledged.add(str(row.get("annotator_id", "")).strip())
+
+    return acknowledged
+
+
+def save_acknowledgement(row):
+    ACK_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    with ACK_PATH.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+        
 def load_taxonomy() -> list[dict]:
     with open(TAXONOMY_PATH, "r", encoding="utf-8") as f:
         return json.load(f)

@@ -7,6 +7,7 @@ from utils.io import (
     load_messages,
     load_annotations,
     load_taxonomy,
+    load_acknowledgements,
     save_annotation,
     utc_now_iso,
 )
@@ -16,7 +17,7 @@ apply_styles()
 
 hero(
     "Annotate",
-    "Label each first-user message using DSM-5 psychosocial/contextual categories.",
+    "Identify the contextual conditions reflected in each help-seeking request.",
 )
 
 messages = load_messages()
@@ -92,6 +93,49 @@ def get_assigned_annotators(message_index):
     ]
 
 
+def get_yes_maybe_decision(message_id, category_id):
+    yes_key = f"{message_id}_{category_id}_yes"
+    maybe_key = f"{message_id}_{category_id}_maybe"
+
+    if yes_key not in st.session_state:
+        st.session_state[yes_key] = False
+
+    if maybe_key not in st.session_state:
+        st.session_state[maybe_key] = False
+
+    def yes_changed():
+        if st.session_state[yes_key]:
+            st.session_state[maybe_key] = False
+
+    def maybe_changed():
+        if st.session_state[maybe_key]:
+            st.session_state[yes_key] = False
+
+    yes_col, maybe_col, _ = st.columns([1, 1, 8])
+
+    with yes_col:
+        st.checkbox(
+            "Yes",
+            key=yes_key,
+            on_change=yes_changed,
+        )
+
+    with maybe_col:
+        st.checkbox(
+            "Maybe",
+            key=maybe_key,
+            on_change=maybe_changed,
+        )
+
+    if st.session_state[yes_key]:
+        return "Yes"
+
+    if st.session_state[maybe_key]:
+        return "Maybe"
+
+    return "No"
+
+
 messages = messages.copy()
 messages["message_id"] = messages["message_id"].astype(str)
 messages = messages.drop_duplicates(subset=["message_id"]).reset_index(drop=True)
@@ -107,6 +151,10 @@ if not annotations.empty:
     annotations["message_id"] = annotations["message_id"].astype(str)
     annotations["annotator_id"] = annotations["annotator_id"].astype(str)
 
+
+annotator_id = None
+is_admin = False
+
 with st.sidebar:
     st.header("Mode")
 
@@ -120,8 +168,61 @@ with st.sidebar:
 
     if mode == "Annotation":
         st.header("Annotator")
-        annotator_id = st.text_input("Expert ID", placeholder="expert_01")
-        is_admin = False
+
+        acknowledged_ids = load_acknowledgements()
+
+        saved_annotator = st.session_state.get("verified_annotator", "").strip()
+
+        if saved_annotator:
+            annotator_id = saved_annotator
+
+            if annotator_id not in ALLOWED_EXPERT_IDS:
+                st.error("Invalid Expert ID. Please enter it again.")
+                st.session_state.pop("verified_annotator", None)
+                st.session_state.pop("instructions_acknowledged", None)
+                st.stop()
+
+            if annotator_id not in acknowledged_ids:
+                st.warning(
+                    "Please read and acknowledge the instructions before annotating."
+                )
+                st.page_link("app.py", label="Go to Instructions", icon="📘")
+                st.stop()
+
+            st.success(f"Expert ID: {annotator_id}")
+
+        else:
+            st.warning(
+                "Enter your Expert ID to continue. All annotators must read the instructions first."
+            )
+
+            returning_id = st.text_input(
+                "Expert ID / UNID",
+                placeholder="e.g. u1234567",
+            ).strip()
+
+            left, center, right = st.columns([1, 2, 1])
+            with center:
+                if st.button("📘 Instructions", use_container_width=True):
+                    st.switch_page("app.py")
+
+            if returning_id:
+                if returning_id not in ALLOWED_EXPERT_IDS:
+                    st.error("Invalid Expert ID. Please check your assigned Expert ID.")
+                    st.stop()
+
+                if returning_id not in acknowledged_ids:
+                    st.error(
+                        "This Expert ID has not acknowledged the instructions yet. "
+                        "Please read the instructions first."
+                    )
+                    st.stop()
+
+                st.session_state["verified_annotator"] = returning_id
+                st.session_state["instructions_acknowledged"] = True
+                st.rerun()
+
+            st.stop()
 
     else:
         st.header("Review")
@@ -131,16 +232,6 @@ with st.sidebar:
 
 
 if mode == "Annotation":
-    if not annotator_id:
-        st.warning("Enter an Expert ID in the sidebar to begin.")
-        st.stop()
-
-    annotator_id = annotator_id.strip()
-
-    if annotator_id not in ALLOWED_EXPERT_IDS:
-        st.error("Invalid Expert ID. Please check your assigned Expert ID and try again.")
-        st.stop()
-
     assigned_message_ids = {
         message_id
         for message_id, assigned_annotators in assignment_lookup.items()
@@ -207,7 +298,7 @@ current = pool[
 ].iloc[0]
 
 safe_msg = html.escape(str(current["first_user_message"]))
-card(f"<h3>First User Message</h3><p>{safe_msg}</p>", "user-card")
+card(f"<h3>User Message</h3><p>{safe_msg}</p>", "user-card")
 
 
 if mode == "Review":
@@ -221,34 +312,29 @@ if mode == "Review":
         else annotations
     )
 
-    assigned_for_current = assignment_lookup.get(
-        str(current["message_id"]),
-        [],
-    )
-
     st.subheader("Annotations")
 
     if prior.empty:
-            card("No prior annotations for this message yet.", "info-card")
+        card("No prior annotations for this message yet.", "info-card")
     else:
-            visible_cols = [
-                col
-                for col in [
-                    "message_id", 
-                    "annotator_id",
-                    "labels",
-                    "category_decisions",
-                    "notes",
-                    "timestamp",
-                ]
-                if col in prior.columns
+        visible_cols = [
+            col
+            for col in [
+                "message_id",
+                "annotator_id",
+                "labels",
+                "category_decisions",
+                "notes",
+                "timestamp",
             ]
+            if col in prior.columns
+        ]
 
-            st.dataframe(
-                prior[visible_cols],
-                use_container_width=True,
-                hide_index=True,
-            )
+        st.dataframe(
+            prior[visible_cols],
+            use_container_width=True,
+            hide_index=True,
+        )
 
     nav1, nav2 = st.columns(2)
 
@@ -266,10 +352,9 @@ if mode == "Review":
 
 
 else:
-    st.subheader("DSM-5 categories")
+    st.subheader("Context Categories")
     st.caption(
-        "Answer Yes / No / Maybe for every category before moving to the next message. "
-        "Use Maybe only if you are unsure."
+        "Select Yes if the category clearly applies, Maybe if uncertain, or leave both unchecked if it does not apply."
     )
 
     category_decisions = {}
@@ -278,13 +363,9 @@ else:
     for item in taxonomy:
         st.markdown(f"### **{item['label']}**")
 
-        decision = st.radio(
-            "Decision",
-            ["Yes", "No", "Maybe"],
-            index=None,
-            horizontal=True,
-            key=f"{current['message_id']}_{item['id']}_decision",
-            label_visibility="collapsed",
+        decision = get_yes_maybe_decision(
+            str(current["message_id"]),
+            item["id"],
         )
 
         category_decisions[item["id"]] = decision
@@ -306,16 +387,8 @@ else:
     next_clicked = st.button("Next", type="primary", use_container_width=True)
 
     if next_clicked:
-        incomplete = [k for k, v in category_decisions.items() if v is None]
-
-        if incomplete:
-            st.error("Please answer Yes, No, or Maybe for every category before continuing.")
-
-        elif "OUT_OF_SCOPE" in selected_labels and len(selected_labels) > 1:
+        if "OUT_OF_SCOPE" in selected_labels and len(selected_labels) > 1:
             st.error("OUT_OF_SCOPE should not be marked Yes with any in-scope category.")
-
-        elif not selected_labels and all(v != "Maybe" for v in category_decisions.values()):
-            st.error("Please mark at least one category as Yes or Maybe.")
 
         else:
             row = {
