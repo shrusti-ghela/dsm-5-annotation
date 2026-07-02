@@ -134,7 +134,7 @@ In addition to these eight contextual categories, the annotation scheme also inc
 with st.expander("Instructions", expanded=True):
     st.markdown(
         """
-Please read the definition of **each category at least once** before starting annotation.
+Please read the instructions and definition of **each category at least once** before starting annotation.
 
 Try to set aside any assumptions about what the category names mean. Some labels may sound intuitive,
 but for this task you should rely on the provided definitions and examples.
@@ -150,24 +150,58 @@ but for this task you should rely on the provided definitions and examples.
                 )
 
     with st.expander("Annotation Instructions", expanded=True):
+#         st.markdown(
+#             """
+# 1. Open the **Annotate** page from the sidebar.
+# 2. Enter your **Expert ID / UNID** if prompted.
+# 3. Ensure you are in **Annotation** mode. The **Review** mode is intended for administrators only.
+# 4. Read the **user message** carefully.
+# 5. For each contextual category:
+#    - Select **Yes** if the category clearly applies.
+#    - Select **Maybe** if the category may apply but you are uncertain.
+#    - Leave both options unselected if the category does **not** apply.
+# 6. Select **all categories that apply**. A message may belong to multiple categories.
+# 7. Select **General Life Help-Seeking** only when the message is clearly seeking guidance or advice but does **not** fit any of the other contextual categories.
+#    - **General Life Help-Seeking** should **not** be selected together with any other category.
+# 8. Select **Out of Scope** only when the message is **not** a personal help-seeking request, or when none of the contextual categories, including **General Life Help-Seeking**, apply.
+#    - **Out of Scope** is **mutually exclusive** and must not be selected together with any other category.
+# 9. Use the optional **Notes / rationale** field to explain your reasoning, especially for ambiguous or borderline cases, or to provide any additional context that may be helpful.
+# """
+#         )
         st.markdown(
-            """
+    """
 1. Open the **Annotate** page from the sidebar.
 2. Enter your **Expert ID / UNID** if prompted.
 3. Ensure you are in **Annotation** mode. The **Review** mode is intended for administrators only.
 4. Read the **user message** carefully.
 5. For each contextual category:
-   - Select **Yes** if the category clearly applies.
-   - Select **Maybe** if the category may apply but you are uncertain.
-   - Leave both options unselected if the category does **not** apply.
+
+<div style="background:#F8FAFC; border-left:5px solid #64748B; padding:0.9rem 1rem; border-radius:0.6rem; margin:1rem 0;">
+Select <b>Yes</b> if the category clearly applies.<br>
+Select <b>Maybe</b> if the category may apply but you are uncertain.<br>
+<span style="background:#FEF3C7; padding:0.15rem 0.35rem; border-radius:0.35rem; font-weight:700;">
+Leave both options unselected if the category does not apply.
+</span>
+</div>
+
 6. Select **all categories that apply**. A message may belong to multiple categories.
-7. Select **General Life Help-Seeking** only when the message is clearly seeking guidance or advice but does **not** fit any of the other contextual categories.
-   - **General Life Help-Seeking** should **not** be selected together with any other category.
-8. Select **Out of Scope** only when the message is **not** a personal help-seeking request, or when none of the contextual categories, including **General Life Help-Seeking**, apply.
-   - **Out of Scope** is **mutually exclusive** and must not be selected together with any other category.
-9. Use the optional **Notes / rationale** field to explain your reasoning, especially for ambiguous or borderline cases, or to provide any additional context that may be helpful.
-"""
-        )
+7. General Life Help-Seeking
+
+<div style="background:#EFF6FF; border-left:5px solid #3B82F6; padding:0.9rem 1rem; border-radius:0.6rem; margin:1rem 0;">
+Select this only when the message is clearly seeking guidance or advice but does <b>not</b> fit any of the other contextual categories.<br>
+<b>Do not select this together with any other category.</b>
+</div>
+8. Out of Scope
+
+<div style="background:#FEF2F2; border-left:5px solid #EF4444; padding:0.9rem 1rem; border-radius:0.6rem; margin:1rem 0;">
+Select this only when the message is <b>not</b> a personal help-seeking request, or when none of the contextual categories, including General Life Help-Seeking, apply.<br>
+<b>Out of Scope is mutually exclusive and must not be selected together with any other category.</b>
+</div>
+
+9. Use the optional **Notes / rationale** field to explain your reasoning, especially for ambiguous or borderline cases.
+""",
+    unsafe_allow_html=True,
+)
 
 
 with st.expander("Examples", expanded=False):
@@ -238,11 +272,11 @@ with st.container(border=True):
     if st.session_state.get("instructions_error"):
         st.error(st.session_state["instructions_error"])
 
-    elif st.session_state.get("verified_annotator"):
-        st.success(
-            f"Instructions acknowledged for **{st.session_state['verified_annotator']}**. "
-            "You may now open the Annotate page from the sidebar."
-        )
+    # elif st.session_state.get("verified_annotator"):
+    #     st.success(
+    #         #f"Instructions acknowledged for **{st.session_state['verified_annotator']}**. "
+    #         #"You may now open the Annotate page from the sidebar."
+    #     )
 
 
 if not st.session_state.get("verified_annotator"):
@@ -250,4 +284,22 @@ if not st.session_state.get("verified_annotator"):
         "Please enter your Expert ID / UNID, read the category definitions, and save the acknowledgement before annotating."
     )
 else:
-    st.info("Use the sidebar navigation to start annotating.")
+    st.markdown(
+        """
+        <div style="text-align:center; padding:1.5rem 0 0.5rem 0;">
+            <h3 style="margin-bottom:0.25rem;">✅ You're ready to begin</h3>
+            <p style="margin-top:0;">Thank you for reviewing the instructions and category definitions.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    c1, c2, c3 = st.columns([2, 3, 2])
+
+    with c2:
+        if st.button(
+            "🚀 Start Annotation",
+            type="primary",
+            use_container_width=True,
+        ):
+            st.switch_page("pages/1_Annotate.py")
