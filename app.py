@@ -1,5 +1,9 @@
+import base64
 import html
+from pathlib import Path
+
 import streamlit as st
+import streamlit.components.v1 as components
 
 from utils.styles import apply_styles, hero
 from utils.io import (
@@ -32,6 +36,11 @@ ALLOWED_EXPERT_IDS = {
 }
 
 
+# Replace the PDF at this location with the final IRB-stamped document.
+# Keep the same filename, or update this path if you rename the file.
+CONSENT_PDF_PATH = Path("assets/consent_letter.pdf")
+
+
 def mark_instructions_complete():
     expert_id = st.session_state.get("home_expert_id", "").strip()
 
@@ -45,9 +54,10 @@ def mark_instructions_complete():
         )
         return
 
-    if not st.session_state.get("read_definitions_checkbox", False):
+    if not st.session_state.get("study_acknowledgement_checkbox", False):
         st.session_state["instructions_error"] = (
-            "Please read the category definitions and check the acknowledgement box before continuing."
+        "Please review the study information, consent document, category definitions, "
+        "and instructions, then check the acknowledgement box before continuing."
         )
         return
 
@@ -65,6 +75,42 @@ def mark_instructions_complete():
     st.session_state["instructions_acknowledged"] = True
     st.session_state["instructions_read_by"] = expert_id
     st.session_state["instructions_error"] = ""
+
+
+
+def display_pdf(pdf_path: Path, height: int = 850):
+    """Display a local PDF inside the Streamlit page."""
+    if not pdf_path.exists():
+        st.error(
+            "The IRB-approved consent PDF could not be found. "
+            f"Expected location: {pdf_path.as_posix()}"
+        )
+        return False
+
+    st.pdf(
+        pdf_path,
+        height=height,
+    )
+
+    return True
+
+    pdf_bytes = pdf_path.read_bytes()
+    encoded_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
+
+    components.html(
+        f"""
+        <iframe
+            src="data:application/pdf;base64,{encoded_pdf}#toolbar=1&navpanes=0"
+            width="100%"
+            height="{height}px"
+            style="border: 1px solid #D1D5DB; border-radius: 10px;"
+            title="IRB-approved study information and consent document">
+        </iframe>
+        """,
+        height=height + 20,
+        scrolling=True,
+    )
+    return True
 
 
 def format_definition(text):
@@ -114,6 +160,16 @@ def format_definition(text):
 hero(
     "Help-Seeking Context Annotation",
 "")
+
+
+with st.expander("Study Information and Consent", expanded=True):
+    st.markdown(
+        """
+Please read the study information and consent document below
+before continuing.
+"""
+    )
+    consent_pdf_available = display_pdf(CONSENT_PDF_PATH)
 
 
 with st.expander("Annotation Task", expanded=True):
@@ -247,6 +303,23 @@ This is a task request, not a personal help-seeking or life-context dilemma.
 """
     )
 
+st.warning(
+    """
+    **Content Warning**
+
+    This annotation task involves reviewing de-identified user messages from real-world conversations.
+    Some messages may contain discussions of sensitive topics, including relationship difficulties,
+    abuse, trauma, mental health concerns, self-harm, suicide, grief, financial hardship, or other
+    potentially distressing situations.
+
+    Participation is voluntary. If you believe that viewing this type of content may be distressing
+    or triggering, please do not continue. You may stop participation at any time without penalty.
+
+    If you experience distress during the study and would like support, please consider contacting
+    an appropriate mental health resource. For participants, support is available through
+    SafeUT: https://safeut.org/
+    """
+)
 
 with st.container(border=True):
     #st.subheader("Acknowledge Instructions")
@@ -258,8 +331,11 @@ with st.container(border=True):
     )
 
     st.checkbox(
-        "I have read the category definitions and instructions before beginning annotation.",
-        key="read_definitions_checkbox",
+    "I have read the study information and consent document, reviewed the "
+    "category definitions and instructions, and voluntarily agree to participate "
+    "in this research study.",
+    key="study_acknowledgement_checkbox",
+    disabled=not consent_pdf_available,
     )
 
     st.button(
@@ -281,7 +357,7 @@ with st.container(border=True):
 
 if not st.session_state.get("verified_annotator"):
     st.warning(
-        "Please enter your Expert ID / UNID, read the category definitions, and save the acknowledgement before annotating."
+        "Please enter your Expert ID / UNID, review the consent document and category definitions, and save the acknowledgement before annotating."
     )
 else:
     st.markdown(

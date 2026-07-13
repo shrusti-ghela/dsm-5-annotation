@@ -166,6 +166,8 @@ with st.sidebar:
 
     st.divider()
 
+    
+
     if mode == "Annotation":
         st.header("Annotator")
 
@@ -258,6 +260,19 @@ if mode == "Annotation":
         st.metric("Remaining", remaining_count)
         st.metric("Assigned total", assigned_count)
 
+        st.divider()
+        st.header("Support Resources")
+
+        st.markdown(
+        """
+        Some messages may contain sensitive or distressing content.
+
+        If you experience distress and would like support, SafeUT is available:
+
+        https://safeut.org/
+        """
+    )
+
     pool = messages[
         messages["message_id"].isin(assigned_message_ids)
         & ~messages["message_id"].isin(annotated_by_user)
@@ -266,6 +281,8 @@ if mode == "Annotation":
     if pool.empty:
         st.success("You have completed all assigned messages.")
         st.stop()
+
+    
 
 else:
     if not is_admin:
