@@ -11,6 +11,9 @@ from utils.io import (
     load_annotations,
     load_taxonomy,
     load_acknowledgements,
+    get_annotation,
+    is_batch_submitted,
+    submit_batch,
     save_annotation,
     utc_now_iso,
 )
@@ -553,15 +556,28 @@ def apply_reassignments(assignments_df, annotations_df):
     return updated
 
 
-def get_yes_maybe_decision(message_id, category_id):
-    yes_key = f"{message_id}_{category_id}_yes"
-    maybe_key = f"{message_id}_{category_id}_maybe"
+def get_yes_maybe_decision(
+    annotator_id,
+    message_id,
+    category_id,
+    saved_decision="No",
+):
+    """Render mutually exclusive Yes/Maybe checkboxes with saved values loaded."""
+    key_prefix = f"{annotator_id}_{message_id}_{category_id}"
+    yes_key = f"{key_prefix}_yes"
+    maybe_key = f"{key_prefix}_maybe"
+
+    normalized_saved = (
+        saved_decision
+        if saved_decision in {"Yes", "Maybe", "No"}
+        else "No"
+    )
 
     if yes_key not in st.session_state:
-        st.session_state[yes_key] = False
+        st.session_state[yes_key] = normalized_saved == "Yes"
 
     if maybe_key not in st.session_state:
-        st.session_state[maybe_key] = False
+        st.session_state[maybe_key] = normalized_saved == "Maybe"
 
     def yes_changed():
         if st.session_state[yes_key]:
@@ -745,65 +761,96 @@ if mode == "Annotation":
         else set()
     )
 
-    assigned_message_ids = set(
-        released_user_assignments["message_id"].astype(str)
-    )
+    # Build the released batches in display order. A submitted batch is locked
+    # and is no longer available for annotation.
+    released_batches = []
 
-    completed_count = len(
-        assigned_message_ids.intersection(annotated_by_user)
-    )
-    assigned_count = len(assigned_message_ids)
-    remaining_count = max(assigned_count - completed_count, 0)
-
-    pilot_assignments = released_user_assignments[
+    pilot_rows = released_user_assignments[
         released_user_assignments["study_phase"] == "pilot"
-    ]
-    pilot_ids = set(pilot_assignments["message_id"].astype(str))
-    pilot_completed = len(pilot_ids.intersection(annotated_by_user))
+    ].copy()
 
-    released_main_assignments = released_user_assignments[
-        released_user_assignments["study_phase"] == "main"
-    ]
-    released_main_ids = set(
-        released_main_assignments["message_id"].astype(str)
-    )
-    main_completed = len(
-        released_main_ids.intersection(annotated_by_user)
-    )
-
-    completed_main_batches = 0
-    for batch_id in sorted(RELEASED_PARTICIPANT_BATCHES):
-        batch_ids = set(
-            released_main_assignments.loc[
-                (released_main_assignments["participant_batch_id"] == batch_id)
-                & (~released_main_assignments["is_reassigned"].astype(bool)),
-                "message_id",
-            ].astype(str)
+    if not pilot_rows.empty:
+        released_batches.append(
+            {
+                "study_phase": "pilot",
+                "batch_id": 0,
+                "label": "Pilot testing batch",
+                "rows": pilot_rows,
+            }
         )
-        if batch_ids and batch_ids.issubset(annotated_by_user):
-            completed_main_batches += 1
 
-    reassigned_for_user = released_user_assignments[
+    normal_main_rows = released_user_assignments[
+        (released_user_assignments["study_phase"] == "main")
+        & (~released_user_assignments["is_reassigned"].astype(bool))
+    ].copy()
+
+    for batch_id in sorted(
+        normal_main_rows["participant_batch_id"].dropna().astype(int).unique()
+    ):
+        batch_rows = normal_main_rows[
+            normal_main_rows["participant_batch_id"].astype(int) == int(batch_id)
+        ].copy()
+
+        released_batches.append(
+            {
+                "study_phase": "main",
+                "batch_id": int(batch_id),
+                "label": (
+                    f"Your main-study batch {int(batch_id)} "
+                    f"of {TOTAL_PARTICIPANT_BATCHES}"
+                ),
+                "rows": batch_rows,
+            }
+        )
+
+    # Reassigned batches are kept separate in the interface. The current
+    # configuration has no reassignment rules, but this preserves compatibility.
+    reassigned_rows = released_user_assignments[
         released_user_assignments["is_reassigned"].astype(bool)
-    ]
-    reassignment_ids = sorted(
-        reassigned_for_user["reassignment_id"].dropna().astype(str).unique()
-    )
-    completed_reassigned_batches = 0
-    for reassignment_id in reassignment_ids:
-        reassigned_ids = set(
-            reassigned_for_user.loc[
-                reassigned_for_user["reassignment_id"].astype(str)
-                == reassignment_id,
-                "message_id",
-            ].astype(str)
-        )
-        if reassigned_ids and reassigned_ids.issubset(annotated_by_user):
-            completed_reassigned_batches += 1
+    ].copy()
 
-    pilot_batch_completed = (
-        bool(pilot_ids)
-        and pilot_ids.issubset(annotated_by_user)
+    for reassignment_id in sorted(
+        reassigned_rows["reassignment_id"].dropna().astype(str).unique()
+    ):
+        if not reassignment_id:
+            continue
+
+        batch_rows = reassigned_rows[
+            reassigned_rows["reassignment_id"].astype(str) == reassignment_id
+        ].copy()
+
+        if batch_rows.empty:
+            continue
+
+        batch_id = int(batch_rows.iloc[0]["participant_batch_id"])
+
+        released_batches.append(
+            {
+                "study_phase": "main",
+                "batch_id": batch_id,
+                "label": str(
+                    batch_rows.iloc[0].get(
+                        "reassignment_batch_label",
+                        f"Reassigned batch {reassignment_id}",
+                    )
+                ),
+                "rows": batch_rows,
+            }
+        )
+
+    for batch in released_batches:
+        batch["submitted"] = is_batch_submitted(
+            annotator_id=str(annotator_id),
+            study_phase=batch["study_phase"],
+            batch_id=batch["batch_id"],
+        )
+
+    unlocked_batches = [
+        batch for batch in released_batches if not batch["submitted"]
+    ]
+
+    completed_batch_count = sum(
+        1 for batch in released_batches if batch["submitted"]
     )
 
     is_formal_annotator = (
@@ -815,27 +862,30 @@ if mode == "Annotation":
         if is_formal_annotator
         else 0
     )
+
     total_formal_batches = (
         TOTAL_PARTICIPANT_BATCHES
         if is_formal_annotator
         else 0
     )
 
-    released_batch_count = (
-        1
-        + released_formal_batches
-        + len(reassignment_ids)
+    reassignment_count = len(
+        [
+            batch
+            for batch in released_batches
+            if batch["label"].startswith("Reassigned batch")
+        ]
     )
+
+    released_batch_count = len(released_batches)
     total_batch_count = (
-        1
-        + total_formal_batches
-        + len(reassignment_ids)
+        1 + total_formal_batches + reassignment_count
     )
-    completed_batch_count = (
-        int(pilot_batch_completed)
-        + completed_main_batches
-        + completed_reassigned_batches
-    )
+
+    remaining_count = 0
+    for batch in unlocked_batches:
+        batch_ids = set(batch["rows"]["message_id"].astype(str))
+        remaining_count += len(batch_ids - annotated_by_user)
 
     with st.sidebar:
         st.metric(
@@ -847,15 +897,6 @@ if mode == "Annotation":
             f"{completed_batch_count}/{released_batch_count}",
         )
         st.metric("Prompts remaining", remaining_count)
-
-        # if is_formal_annotator:
-        #     st.caption(
-        #         "The pilot is a testing batch."
-        #     )
-        # else:
-        #     st.caption(
-        #         "You currently have access only to the pilot testing batch."
-        #     )
 
         st.divider()
         st.header("Support Resources")
@@ -870,29 +911,37 @@ if mode == "Annotation":
             """
         )
 
-    pool = released_user_assignments[
-        ~released_user_assignments["message_id"].isin(annotated_by_user)
-    ].merge(
+    if not released_batches:
+        st.info("No annotation batches are currently available.")
+        st.stop()
+
+    if not unlocked_batches:
+        st.success("You have submitted all currently released batches.")
+        st.stop()
+
+    # Work through one complete batch at a time. Saved prompts remain in the
+    # pool so annotators can use Previous and edit them until final submission.
+    active_batch = unlocked_batches[0]
+    active_batch_key = (
+        active_batch["study_phase"],
+        active_batch["batch_id"],
+        active_batch["label"],
+    )
+
+    if st.session_state.get("active_batch_key") != active_batch_key:
+        st.session_state["active_batch_key"] = active_batch_key
+        st.session_state["current_message_id"] = None
+
+    pool = active_batch["rows"].merge(
         messages,
         on=["message_id", "study_phase"],
         how="left",
     )
 
-    pool["display_order"] = pool.apply(
-        lambda row: (
-            0
-            if row["study_phase"] == "pilot"
-            else (2 if bool(row.get("is_reassigned", False)) else 1)
-        ),
-        axis=1,
-    )
-    pool = pool.sort_values(
-        ["display_order", "participant_batch_id", "reassignment_id", "message_id"]
-    ).reset_index(drop=True)
-
-    if pool.empty:
-        st.success("You have completed all currently released assignments.")
-        st.stop()
+    pool = pool.sort_values("message_id").reset_index(drop=True)
+    active_batch_label = active_batch["label"]
+    active_study_phase = active_batch["study_phase"]
+    active_batch_id = active_batch["batch_id"]
 
 else:
     if not is_admin:
@@ -978,12 +1027,50 @@ else:
 
 pool_ids = pool["message_id"].astype(str).tolist()
 
-if (
-    "current_message_id" not in st.session_state
-    or st.session_state.current_message_id is None
-    or st.session_state.current_message_id not in pool_ids
-):
-    st.session_state.current_message_id = str(pool_ids[0])
+if mode == "Annotation":
+    # Resume each active batch at the first prompt that has not yet been saved.
+    # Previously saved prompts remain in `pool_ids`, so annotators can still use
+    # Previous to revisit and edit them before submitting the batch.
+    unfinished_ids = [
+        message_id
+        for message_id in pool_ids
+        if message_id not in annotated_by_user
+    ]
+
+    resume_batch_key = (
+        str(annotator_id),
+        str(active_study_phase),
+        int(active_batch_id),
+        str(active_batch_label),
+    )
+
+    # Increment this value whenever the resume behavior changes. This forces
+    # existing Streamlit sessions to adopt the newest initialization logic.
+    RESUME_LOGIC_VERSION = 2
+
+    should_initialize_resume_position = (
+        st.session_state.get("resume_batch_key") != resume_batch_key
+        or st.session_state.get("resume_logic_version")
+        != RESUME_LOGIC_VERSION
+        or st.session_state.get("current_message_id") not in pool_ids
+    )
+
+    if should_initialize_resume_position:
+        st.session_state["resume_batch_key"] = resume_batch_key
+        st.session_state["resume_logic_version"] = RESUME_LOGIC_VERSION
+        st.session_state["current_message_id"] = (
+            unfinished_ids[0]
+            if unfinished_ids
+            else pool_ids[-1]
+        )
+
+else:
+    if (
+        "current_message_id" not in st.session_state
+        or st.session_state.current_message_id is None
+        or st.session_state.current_message_id not in pool_ids
+    ):
+        st.session_state.current_message_id = str(pool_ids[0])
 
 current = pool[
     pool["message_id"].astype(str) == st.session_state.current_message_id
@@ -1062,26 +1149,57 @@ if mode == "Review":
 
 
 else:
+    current_idx = pool_ids.index(str(current["message_id"]))
+    current_message_id = str(current["message_id"])
+
+    saved_annotation = get_annotation(
+        annotator_id=str(annotator_id),
+        message_id=current_message_id,
+    )
+
+    saved_decisions = {}
+    saved_notes = ""
+
+    if saved_annotation:
+        saved_decisions = saved_annotation.get(
+            "category_decisions",
+            {},
+        )
+
+        if isinstance(saved_decisions, str):
+            try:
+                saved_decisions = json.loads(saved_decisions)
+            except json.JSONDecodeError:
+                saved_decisions = {}
+
+        if not isinstance(saved_decisions, dict):
+            saved_decisions = {}
+
+        saved_notes = str(saved_annotation.get("notes", ""))
+
+    st.caption(
+        f"Prompt {current_idx + 1} of {len(pool_ids)} · {active_batch_label}"
+    )
+
     st.subheader("Context Categories")
     st.caption(
-        "Select Yes if the category clearly applies, Maybe if uncertain, or leave both unchecked if it does not apply."
+        "Select Yes if the category clearly applies, Maybe if uncertain, "
+        "or leave both unchecked if it does not apply."
     )
 
     category_decisions = {}
-    selected_labels = []
 
     for item in taxonomy:
         st.markdown(f"### **{item['label']}**")
 
         decision = get_yes_maybe_decision(
-            str(current["message_id"]),
-            item["id"],
+            annotator_id=str(annotator_id),
+            message_id=current_message_id,
+            category_id=item["id"],
+            saved_decision=saved_decisions.get(item["id"], "No"),
         )
 
         category_decisions[item["id"]] = decision
-
-        if decision == "Yes":
-            selected_labels.append(item["id"])
 
         with st.expander("Definition", expanded=False):
             st.markdown(
@@ -1089,14 +1207,40 @@ else:
                 unsafe_allow_html=True,
             )
 
+    notes_key = f"{annotator_id}_{current_message_id}_notes"
+
+    if notes_key not in st.session_state:
+        st.session_state[notes_key] = saved_notes
+
     notes = st.text_area(
         "Notes / rationale",
         placeholder="Optional note about why you selected these labels",
+        key=notes_key,
     )
 
-    next_clicked = st.button("Next", type="primary", use_container_width=True)
+    is_last_prompt = current_idx == len(pool_ids) - 1
+    previous_col, action_col = st.columns(2)
 
-    if next_clicked:
+    with previous_col:
+        previous_clicked = st.button(
+            "← Previous",
+            use_container_width=True,
+            disabled=current_idx == 0,
+        )
+
+    with action_col:
+        action_clicked = st.button(
+            "Submit batch" if is_last_prompt else "Save & Next →",
+            type="primary",
+            use_container_width=True,
+        )
+
+    if previous_clicked:
+        st.session_state.current_message_id = pool_ids[current_idx - 1]
+        st.session_state["scroll_to_top"] = True
+        st.rerun()
+
+    if action_clicked:
         yes_labels = [
             category_id
             for category_id, decision in category_decisions.items()
@@ -1111,70 +1255,127 @@ else:
 
         selected_or_maybe_labels = yes_labels + maybe_labels
 
-        fallback_labels = {"GENERAL_LIFE_HELP_SEEKING", "OUT_OF_SCOPE"}
+        fallback_labels = {
+            "GENERAL_LIFE_HELP_SEEKING",
+            "OUT_OF_SCOPE",
+        }
+
         selected_fallbacks = [
-            label for label in selected_or_maybe_labels if label in fallback_labels
+            label
+            for label in selected_or_maybe_labels
+            if label in fallback_labels
         ]
 
         selected_primary_labels = [
-            label for label in selected_or_maybe_labels if label not in fallback_labels
+            label
+            for label in selected_or_maybe_labels
+            if label not in fallback_labels
         ]
 
+        validation_error = None
+
         if not selected_or_maybe_labels:
-            st.error(
+            validation_error = (
                 "Please select at least one category as Yes or Maybe. "
-                "If none of the contextual categories apply, select General Life Help-Seeking or Out of Scope."
+                "If none of the contextual categories apply, select "
+                "General Life Help-Seeking or Out of Scope."
             )
 
         elif selected_primary_labels and selected_fallbacks:
-            st.error(
-                "General Life Help-Seeking and Out of Scope should only be used when none of the other contextual categories apply."
+            validation_error = (
+                "General Life Help-Seeking and Out of Scope should only "
+                "be used when none of the other contextual categories apply."
             )
 
         elif len(selected_fallbacks) > 1:
-            st.error(
-                "General Life Help-Seeking and Out of Scope are mutually exclusive. Please select only one."
+            validation_error = (
+                "General Life Help-Seeking and Out of Scope are mutually "
+                "exclusive. Please select only one."
             )
+
+        if validation_error:
+            st.error(validation_error)
 
         else:
             row = {
-                "message_id": str(current.get("message_id", "")),
-                "conversation_id": str(current.get("conversation_id", "")),
-                "first_user_message": str(current.get("first_user_message", "")),
+                "message_id": current_message_id,
+                "conversation_id": str(
+                    current.get("conversation_id", "")
+                ),
+                "first_user_message": str(
+                    current.get("first_user_message", "")
+                ),
                 "annotator_id": str(annotator_id),
-                "study_phase": str(current.get("study_phase", "")),
-                "batch_id": int(current.get("participant_batch_id", 0)),
+                "study_phase": str(active_study_phase),
+                "batch_id": int(active_batch_id),
                 "participation_type": (
                     "pilot_tester"
-                    if str(current.get("study_phase", "")) == "pilot"
+                    if str(active_study_phase) == "pilot"
                     else "formal_annotator"
                 ),
                 "is_compensated_batch": (
-                    str(current.get("study_phase", "")) != "pilot"
+                    str(active_study_phase) != "pilot"
                 ),
                 "original_annotator_id": str(
-                    current.get("original_annotator_id", annotator_id)
+                    current.get(
+                        "original_annotator_id",
+                        annotator_id,
+                    )
                 ),
-                "is_reassigned": bool(current.get("is_reassigned", False)),
-                "reassignment_id": str(current.get("reassignment_id", "")),
+                "is_reassigned": bool(
+                    current.get("is_reassigned", False)
+                ),
+                "reassignment_id": str(
+                    current.get("reassignment_id", "")
+                ),
                 "labels": ";".join(yes_labels),
-                "category_decisions": json.dumps(category_decisions),
+                "maybe_labels": ";".join(maybe_labels),
+                "category_decisions": json.dumps(
+                    category_decisions
+                ),
                 "notes": notes,
                 "timestamp": utc_now_iso(),
             }
 
             save_annotation(row)
-            st.cache_data.clear()
 
-            remaining_ids = [
-                message_id
-                for message_id in pool_ids
-                if message_id != str(current["message_id"])
+            if is_last_prompt:
+                refreshed_annotations = load_annotations()
+
+                completed_ids = set(
+                    refreshed_annotations.loc[
+                        refreshed_annotations["annotator_id"].astype(str)
+                        == str(annotator_id),
+                        "message_id",
+                    ].astype(str)
+                )
+
+                missing_ids = set(pool_ids) - completed_ids
+
+                if missing_ids:
+                    st.error(
+                        "Every prompt in this batch must be saved before "
+                        "the batch can be submitted."
+                    )
+                    st.stop()
+
+                submit_batch(
+                    annotator_id=str(annotator_id),
+                    study_phase=str(active_study_phase),
+                    batch_id=int(active_batch_id),
+                )
+
+                st.session_state["current_message_id"] = None
+                st.session_state["active_batch_key"] = None
+                st.session_state["scroll_to_top"] = True
+                st.success(
+                    "Batch submitted successfully. It is now locked "
+                    "and can no longer be edited."
+                )
+                st.rerun()
+
+            st.session_state.current_message_id = pool_ids[
+                current_idx + 1
             ]
-
-            st.session_state.current_message_id = (
-                remaining_ids[0] if remaining_ids else None
-            )
-
             st.session_state["scroll_to_top"] = True
             st.rerun()
