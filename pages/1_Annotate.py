@@ -1,7 +1,8 @@
 import html
 import json
+import pandas as pd
 import streamlit as st
-
+import streamlit.components.v1 as components
 from utils.styles import apply_styles, hero, card
 from utils.io import (
     load_messages,
@@ -19,6 +20,65 @@ hero(
     "Annotate",
     "Identify the contextual conditions reflected in each help-seeking request.",
 )
+
+if st.session_state.pop("scroll_to_top", False):
+    components.html(
+        """
+        <script>
+        function forceScrollToTop() {
+            const doc = window.parent.document;
+
+            const targets = [
+                doc.querySelector('[data-testid="stAppViewContainer"]'),
+                doc.querySelector('[data-testid="stMain"]'),
+                doc.querySelector('section.main'),
+                doc.documentElement,
+                doc.body
+            ];
+
+            targets.forEach((target) => {
+                if (!target) return;
+
+                try {
+                    target.scrollTop = 0;
+                } catch (error) {}
+
+                try {
+                    target.scrollTo({
+                        top: 0,
+                        left: 0,
+                        behavior: "auto"
+                    });
+                } catch (error) {}
+            });
+
+            const mainBlock = doc.querySelector(
+                '[data-testid="stMainBlockContainer"]'
+            );
+
+            if (mainBlock) {
+                try {
+                    mainBlock.scrollIntoView({
+                        behavior: "auto",
+                        block: "start"
+                    });
+                } catch (error) {}
+            }
+
+            try {
+                window.parent.scrollTo(0, 0);
+            } catch (error) {}
+        }
+
+        forceScrollToTop();
+        [50, 100, 200, 400, 700, 1000].forEach((delay) => {
+            setTimeout(forceScrollToTop, delay);
+        });
+        </script>
+        """,
+        height=0,
+        width=0,
+    )
 
 messages = load_messages()
 annotations = load_annotations()
@@ -72,25 +132,362 @@ def format_definition(text):
 
 ADMIN_PASSWORD = st.secrets.get("ADMIN_PASSWORD", "admin123")
 
-ALLOWED_EXPERT_IDS = {
+# -----------------------------------------------------------------------------
+# STUDY / PARTICIPANT-BATCH CONFIGURATION
+# -----------------------------------------------------------------------------
+ANNOTATOR_IDS = [
     "u6045151",
     "u1655162",
     "1",
     "2",
-    "3",
-}
+]
+ALLOWED_EXPERT_IDS = set(ANNOTATOR_IDS)
 
-ANNOTATIONS_REQUIRED_PER_MESSAGE = 3
-ANNOTATOR_IDS = sorted(list(ALLOWED_EXPERT_IDS))
+PILOT_SIZE = 8
+MAIN_STUDY_SIZE = 100
 
+# Each participant receives exactly 50 main-study prompts:
+# one personal batch of 8 prompts and six personal batches of 7 prompts.
+PARTICIPANT_BATCH_SIZES = [8] + [7] * 6
+TOTAL_PARTICIPANT_BATCHES = len(PARTICIPANT_BATCH_SIZES)
+assert sum(PARTICIPANT_BATCH_SIZES) == 50
 
-def get_assigned_annotators(message_index):
-    start = message_index % len(ANNOTATOR_IDS)
+# Pilot is always available.
+# Release personal main-study batches by adding their numbers here.
+# Examples:
+#   set()             -> pilot only
+#   {1}               -> pilot + personal batch 1
+#   {1, 2, 3}         -> pilot + personal batches 1-3
+#   set(range(1, 8))  -> pilot + all seven personal batches
+RELEASED_PARTICIPANT_BATCHES = {1}
 
-    return [
-        ANNOTATOR_IDS[(start + offset) % len(ANNOTATOR_IDS)]
-        for offset in range(ANNOTATIONS_REQUIRED_PER_MESSAGE)
+# Optional reassignment rules. Leave this empty during the pilot unless needed.
+# Each rule transfers only unfinished prompts from one participant batch.
+# Candidate replacements are tried in order. A candidate is skipped when they
+# are already assigned to, or have already annotated, that message.
+#
+# Example:
+# REASSIGNMENT_RULES = [
+#     {
+#         "reassignment_id": "r1",
+#         "from_annotator": "1",
+#         "participant_batch_id": 3,
+#         "to_annotators": ["2", "u6045151", "u1655162"],
+#     }
+# ]
+REASSIGNMENT_RULES = []
+# REASSIGNMENT_RULES = [
+#     {
+#         "reassignment_id": "r1",
+#         "from_annotator": "u6045151",
+#         "participant_batch_id": 1,
+#         "to_annotators": [
+#             "2",
+#             "1",
+#             "u1655162",
+#         ],
+#     }
+# ]
+
+def build_balanced_main_pairs():
+    """Return 100 annotator pairs with exactly 50 assignments per annotator."""
+    a, b, c, d = ANNOTATOR_IDS
+
+    all_six_pairs = [
+        (a, b),
+        (a, c),
+        (a, d),
+        (b, c),
+        (b, d),
+        (c, d),
     ]
+
+    final_four_pairs = [
+        (a, b),
+        (c, d),
+        (a, c),
+        (b, d),
+    ]
+
+    pairs = all_six_pairs * 16 + final_four_pairs
+    assert len(pairs) == MAIN_STUDY_SIZE
+
+    counts = {annotator: 0 for annotator in ANNOTATOR_IDS}
+    for pair in pairs:
+        for annotator in pair:
+            counts[annotator] += 1
+
+    assert all(count == 50 for count in counts.values())
+    return pairs
+
+
+MAIN_ASSIGNMENT_PAIRS = build_balanced_main_pairs()
+
+
+def assign_personal_batches(main_df, main_pairs):
+    """
+    Create annotator-specific batches.
+
+    Each annotator receives exactly 50 assigned prompts, divided into seven
+    personal batches sized [8, 7, 7, 7, 7, 7, 7]. Messages are balanced by
+    character length separately for each annotator.
+    """
+    if len(main_df) != MAIN_STUDY_SIZE:
+        raise ValueError(
+            f"Expected {MAIN_STUDY_SIZE} main-study messages, "
+            f"but received {len(main_df)}."
+        )
+
+    message_lengths = (
+        main_df["first_user_message"]
+        .fillna("")
+        .astype(str)
+        .str.len()
+        .tolist()
+    )
+
+    assignments = []
+
+    for annotator_id in ANNOTATOR_IDS:
+        assigned_indices = [
+            main_idx
+            for main_idx, pair in enumerate(main_pairs)
+            if annotator_id in pair
+        ]
+
+        if len(assigned_indices) != 50:
+            raise ValueError(
+                f"Annotator {annotator_id} has {len(assigned_indices)} main "
+                "assignments instead of 50."
+            )
+
+        batch_total_lengths = [0] * TOTAL_PARTICIPANT_BATCHES
+        batch_counts = [0] * TOTAL_PARTICIPANT_BATCHES
+        batch_for_index = {}
+
+        longest_first = sorted(
+            assigned_indices,
+            key=lambda idx: (-message_lengths[idx], idx),
+        )
+
+        for main_idx in longest_first:
+            eligible_batches = [
+                batch_idx
+                for batch_idx, target_size in enumerate(PARTICIPANT_BATCH_SIZES)
+                if batch_counts[batch_idx] < target_size
+            ]
+
+            selected_batch = min(
+                eligible_batches,
+                key=lambda batch_idx: (
+                    batch_total_lengths[batch_idx],
+                    batch_counts[batch_idx],
+                    batch_idx,
+                ),
+            )
+
+            batch_for_index[main_idx] = selected_batch + 1
+            batch_counts[selected_batch] += 1
+            batch_total_lengths[selected_batch] += message_lengths[main_idx]
+
+        assert batch_counts == PARTICIPANT_BATCH_SIZES
+
+        for main_idx in assigned_indices:
+            assignments.append(
+                {
+                    "message_id": str(main_df.iloc[main_idx]["message_id"]),
+                    "annotator_id": str(annotator_id),
+                    "study_phase": "main",
+                    "participant_batch_id": int(batch_for_index[main_idx]),
+                    "is_released": (
+                        batch_for_index[main_idx]
+                        in RELEASED_PARTICIPANT_BATCHES
+                    ),
+                    "original_annotator_id": str(annotator_id),
+                    "is_reassigned": False,
+                    "reassignment_id": "",
+                    "reassignment_batch_label": "",
+                }
+            )
+
+    return assignments
+
+
+def prepare_study(messages_df):
+    """
+    Prepare the 8-message pilot and 100-message main study.
+
+    Expected row order:
+      rows 0-7   = pilot
+      rows 8-107 = main study
+    """
+    expected = PILOT_SIZE + MAIN_STUDY_SIZE
+    if len(messages_df) < expected:
+        st.error(
+            f"Expected at least {expected} unique messages "
+            f"({PILOT_SIZE} pilot + {MAIN_STUDY_SIZE} main), "
+            f"but load_messages() returned {len(messages_df)}."
+        )
+        st.stop()
+
+    study_messages = messages_df.iloc[:expected].copy().reset_index(drop=True)
+    study_messages["study_phase"] = "main"
+
+    for idx in range(PILOT_SIZE):
+        study_messages.at[idx, "study_phase"] = "pilot"
+
+    assignment_rows = []
+
+    # Every annotator receives every pilot prompt.
+    for idx in range(PILOT_SIZE):
+        message_id = str(study_messages.iloc[idx]["message_id"])
+        for annotator_id in ANNOTATOR_IDS:
+            assignment_rows.append(
+                {
+                    "message_id": message_id,
+                    "annotator_id": str(annotator_id),
+                    "study_phase": "pilot",
+                    "participant_batch_id": 0,
+                    "is_released": True,
+                    "original_annotator_id": str(annotator_id),
+                    "is_reassigned": False,
+                    "reassignment_id": "",
+                    "reassignment_batch_label": "",
+                }
+            )
+
+    main_df = study_messages.iloc[PILOT_SIZE:].copy().reset_index(drop=True)
+    assignment_rows.extend(
+        assign_personal_batches(main_df, MAIN_ASSIGNMENT_PAIRS)
+    )
+
+    return study_messages, assignment_rows
+
+
+def apply_reassignments(assignments_df, annotations_df):
+    """Transfer only unfinished assignments while preventing duplicate annotation.
+
+    A replacement is never assigned a message when they are already assigned to
+    that message or already have a saved annotation for it. Completed work by the
+    original annotator is never moved.
+    """
+    updated = assignments_df.copy()
+
+    if not REASSIGNMENT_RULES:
+        return updated
+
+    completed_pairs = set()
+    if not annotations_df.empty:
+        completed_pairs = set(
+            zip(
+                annotations_df["message_id"].astype(str),
+                annotations_df["annotator_id"].astype(str),
+            )
+        )
+
+    for rule in REASSIGNMENT_RULES:
+        reassignment_id = str(rule.get("reassignment_id", "")).strip()
+        from_annotator = str(rule.get("from_annotator", "")).strip()
+        participant_batch_id = int(rule.get("participant_batch_id", -1))
+        candidates = [str(x).strip() for x in rule.get("to_annotators", [])]
+
+        if not reassignment_id:
+            raise ValueError("Every reassignment rule needs a reassignment_id.")
+        if from_annotator not in ALLOWED_EXPERT_IDS:
+            raise ValueError(f"Unknown original annotator: {from_annotator}")
+        if participant_batch_id not in range(1, TOTAL_PARTICIPANT_BATCHES + 1):
+            raise ValueError(
+                f"Invalid participant_batch_id {participant_batch_id} "
+                f"for reassignment {reassignment_id}."
+            )
+        if not candidates:
+            raise ValueError(
+                f"Reassignment {reassignment_id} needs at least one replacement candidate."
+            )
+        if any(candidate not in ALLOWED_EXPERT_IDS for candidate in candidates):
+            raise ValueError(
+                f"Reassignment {reassignment_id} contains an unknown replacement annotator."
+            )
+        if from_annotator in candidates:
+            raise ValueError(
+                f"Reassignment {reassignment_id} cannot assign work back to {from_annotator}."
+            )
+
+        source_mask = (
+            (updated["annotator_id"].astype(str) == from_annotator)
+            & (updated["study_phase"] == "main")
+            & (updated["participant_batch_id"] == participant_batch_id)
+            & (~updated["is_reassigned"].astype(bool))
+        )
+        source_indices = updated.index[source_mask].tolist()
+
+        if not source_indices:
+            raise ValueError(
+                f"No original assignments found for annotator {from_annotator}, "
+                f"batch {participant_batch_id}."
+            )
+
+        moved = 0
+        for row_index in source_indices:
+            message_id = str(updated.at[row_index, "message_id"])
+
+            # Never move an assignment the original annotator already completed.
+            if (message_id, from_annotator) in completed_pairs:
+                continue
+
+            currently_assigned = set(
+                updated.loc[
+                    updated["message_id"].astype(str) == message_id,
+                    "annotator_id",
+                ].astype(str)
+            )
+            already_completed = {
+                annotator
+                for completed_message, annotator in completed_pairs
+                if completed_message == message_id
+            }
+            forbidden = currently_assigned | already_completed
+            forbidden.discard(from_annotator)
+
+            replacement = next(
+                (candidate for candidate in candidates if candidate not in forbidden),
+                None,
+            )
+
+            if replacement is None:
+                raise ValueError(
+                    f"Could not reassign message {message_id} from {from_annotator}. "
+                    "Every configured replacement is already assigned to or has "
+                    "already annotated this message."
+                )
+
+            updated.at[row_index, "original_annotator_id"] = from_annotator
+            updated.at[row_index, "annotator_id"] = replacement
+            updated.at[row_index, "is_reassigned"] = True
+            updated.at[row_index, "reassignment_id"] = reassignment_id
+            updated.at[row_index, "reassignment_batch_label"] = (
+                f"Reassigned batch {reassignment_id}"
+            )
+            updated.at[row_index, "is_released"] = True
+            moved += 1
+
+        if moved == 0:
+            # This is allowed when the original participant already finished the batch.
+            continue
+
+    # Final safety check: no participant can hold duplicate assignments for a message.
+    duplicates = updated.duplicated(
+        subset=["message_id", "annotator_id"],
+        keep=False,
+    )
+    if duplicates.any():
+        duplicate_rows = updated.loc[duplicates, ["message_id", "annotator_id"]]
+        raise ValueError(
+            "Reassignment produced duplicate message/annotator assignments: "
+            f"{duplicate_rows.to_dict(orient='records')}"
+        )
+
+    return updated
 
 
 def get_yes_maybe_decision(message_id, category_id):
@@ -139,17 +536,16 @@ def get_yes_maybe_decision(message_id, category_id):
 messages = messages.copy()
 messages["message_id"] = messages["message_id"].astype(str)
 messages = messages.drop_duplicates(subset=["message_id"]).reset_index(drop=True)
+messages, assignment_rows = prepare_study(messages)
 
-assignment_lookup = {}
-
-for idx, row in messages.iterrows():
-    message_id = str(row["message_id"])
-    assignment_lookup[message_id] = get_assigned_annotators(idx)
+assignments = pd.DataFrame(assignment_rows)
 
 if not annotations.empty:
     annotations = annotations.copy()
     annotations["message_id"] = annotations["message_id"].astype(str)
     annotations["annotator_id"] = annotations["annotator_id"].astype(str)
+
+assignments = apply_reassignments(assignments, annotations)
 
 
 annotator_id = None
@@ -234,70 +630,205 @@ with st.sidebar:
 
 
 if mode == "Annotation":
-    assigned_message_ids = {
-        message_id
-        for message_id, assigned_annotators in assignment_lookup.items()
-        if annotator_id in assigned_annotators
-    }
+    user_assignments = assignments[
+        assignments["annotator_id"] == str(annotator_id)
+    ].copy()
+
+    released_user_assignments = user_assignments[
+        user_assignments["is_released"]
+    ].copy()
 
     annotated_by_user = (
         set(
             annotations.loc[
                 annotations["annotator_id"] == str(annotator_id),
                 "message_id",
-            ]
+            ].astype(str)
         )
         if not annotations.empty
         else set()
     )
 
-    completed_count = len(assigned_message_ids.intersection(annotated_by_user))
+    assigned_message_ids = set(
+        released_user_assignments["message_id"].astype(str)
+    )
+
+    completed_count = len(
+        assigned_message_ids.intersection(annotated_by_user)
+    )
     assigned_count = len(assigned_message_ids)
     remaining_count = max(assigned_count - completed_count, 0)
 
+    pilot_assignments = released_user_assignments[
+        released_user_assignments["study_phase"] == "pilot"
+    ]
+    pilot_ids = set(pilot_assignments["message_id"].astype(str))
+    pilot_completed = len(pilot_ids.intersection(annotated_by_user))
+
+    released_main_assignments = released_user_assignments[
+        released_user_assignments["study_phase"] == "main"
+    ]
+    released_main_ids = set(
+        released_main_assignments["message_id"].astype(str)
+    )
+    main_completed = len(
+        released_main_ids.intersection(annotated_by_user)
+    )
+
+    completed_main_batches = 0
+    for batch_id in sorted(RELEASED_PARTICIPANT_BATCHES):
+        batch_ids = set(
+            released_main_assignments.loc[
+                (released_main_assignments["participant_batch_id"] == batch_id)
+                & (~released_main_assignments["is_reassigned"].astype(bool)),
+                "message_id",
+            ].astype(str)
+        )
+        if batch_ids and batch_ids.issubset(annotated_by_user):
+            completed_main_batches += 1
+
+    reassigned_for_user = released_user_assignments[
+        released_user_assignments["is_reassigned"].astype(bool)
+    ]
+    reassignment_ids = sorted(
+        reassigned_for_user["reassignment_id"].dropna().astype(str).unique()
+    )
+    completed_reassigned_batches = 0
+    for reassignment_id in reassignment_ids:
+        reassigned_ids = set(
+            reassigned_for_user.loc[
+                reassigned_for_user["reassignment_id"].astype(str)
+                == reassignment_id,
+                "message_id",
+            ].astype(str)
+        )
+        if reassigned_ids and reassigned_ids.issubset(annotated_by_user):
+            completed_reassigned_batches += 1
+
+    pilot_batch_completed = pilot_completed == PILOT_SIZE
+    released_reimbursable_batches = (
+        1 + len(RELEASED_PARTICIPANT_BATCHES) + len(reassignment_ids)
+    )
+    total_reimbursable_batches = (
+        1 + TOTAL_PARTICIPANT_BATCHES + len(reassignment_ids)
+    )
+    completed_reimbursable_batches = (
+        int(pilot_batch_completed)
+        + completed_main_batches
+        + completed_reassigned_batches
+    )
+
     with st.sidebar:
-        st.metric("Completed", completed_count)
-        st.metric("Remaining", remaining_count)
-        st.metric("Assigned total", assigned_count)
+        st.metric(
+            "Batches available",
+            f"{released_reimbursable_batches}/{total_reimbursable_batches}",
+        )
+        st.metric(
+            "Batches completed",
+            f"{completed_reimbursable_batches}/{released_reimbursable_batches}",
+        )
+        st.metric("Prompts remaining", remaining_count)
+        st.caption("The pilot counts as one reimbursable batch.")
 
         st.divider()
         st.header("Support Resources")
 
         st.markdown(
-        """
-        Some messages may contain sensitive or distressing content.
+            """
+            Some messages may contain sensitive or distressing content.
 
-        If you experience distress and would like support, SafeUT is available:
+            If you experience distress and would like support, SafeUT is available:
 
-        https://safeut.org/
-        """
+            https://safeut.org/
+            """
+        )
+
+    pool = released_user_assignments[
+        ~released_user_assignments["message_id"].isin(annotated_by_user)
+    ].merge(
+        messages,
+        on=["message_id", "study_phase"],
+        how="left",
     )
 
-    pool = messages[
-        messages["message_id"].isin(assigned_message_ids)
-        & ~messages["message_id"].isin(annotated_by_user)
-    ].copy()
+    pool["display_order"] = pool.apply(
+        lambda row: (
+            0
+            if row["study_phase"] == "pilot"
+            else (2 if bool(row.get("is_reassigned", False)) else 1)
+        ),
+        axis=1,
+    )
+    pool = pool.sort_values(
+        ["display_order", "participant_batch_id", "reassignment_id", "message_id"]
+    ).reset_index(drop=True)
 
     if pool.empty:
-        st.success("You have completed all assigned messages.")
+        st.success("You have completed all currently released assignments.")
         st.stop()
-
-    
 
 else:
     if not is_admin:
-        st.warning("Enter the admin password in the sidebar to review all samples.")
+        st.warning("Enter the admin password in the sidebar to review samples.")
         st.stop()
 
     with st.sidebar:
         st.metric("Total samples", len(messages))
         st.metric("Total annotations", len(annotations))
 
-    pool = messages.copy()
+    review_annotator = st.sidebar.selectbox(
+        "Review annotator",
+        ["All annotators"] + ANNOTATOR_IDS,
+    )
+
+    if review_annotator == "All annotators":
+        review_options = ["All messages", "Pilot"]
+    else:
+        review_options = ["All assigned", "Pilot"] + [
+            f"Personal batch {batch_id}"
+            for batch_id in range(1, TOTAL_PARTICIPANT_BATCHES + 1)
+        ]
+
+    selected_review_batch = st.sidebar.selectbox(
+        "Review phase / batch",
+        review_options,
+    )
+
+    if review_annotator == "All annotators":
+        if selected_review_batch == "Pilot":
+            pool = messages[messages["study_phase"] == "pilot"].copy()
+            pool["participant_batch_id"] = 0
+        else:
+            pool = messages.copy()
+            pool["participant_batch_id"] = ""
+    else:
+        review_assignments = assignments[
+            assignments["annotator_id"] == str(review_annotator)
+        ].copy()
+
+        if selected_review_batch == "Pilot":
+            review_assignments = review_assignments[
+                review_assignments["study_phase"] == "pilot"
+            ]
+        elif selected_review_batch.startswith("Personal batch"):
+            selected_batch_id = int(selected_review_batch.split()[-1])
+            review_assignments = review_assignments[
+                (review_assignments["study_phase"] == "main")
+                & (
+                    review_assignments["participant_batch_id"]
+                    == selected_batch_id
+                )
+            ]
+
+        pool = review_assignments.merge(
+            messages,
+            on=["message_id", "study_phase"],
+            how="left",
+        )
 
     st.info(
-        "Admin review mode: you can view all samples, metadata, and prior annotations. "
-        "Annotation controls are disabled."
+        "Admin review mode: personal batch numbers belong to the selected "
+        "annotator. Annotation controls are disabled."
     )
 
 
@@ -315,6 +846,20 @@ current = pool[
 ].iloc[0]
 
 safe_msg = html.escape(str(current["first_user_message"]))
+
+if current["study_phase"] == "pilot":
+    phase_label = "Pilot"
+elif bool(current.get("is_reassigned", False)):
+    phase_label = str(
+        current.get("reassignment_batch_label", "Reassigned batch")
+    )
+else:
+    phase_label = (
+        f"Your main-study batch "
+        f"{int(current['participant_batch_id'])} of {TOTAL_PARTICIPANT_BATCHES}"
+    )
+
+st.caption(phase_label)
 card(f"<h3>User Message</h3><p>{safe_msg}</p>", "user-card")
 
 
@@ -338,6 +883,8 @@ if mode == "Review":
             col
             for col in [
                 "message_id",
+                "study_phase",
+                "batch_id",
                 "annotator_id",
                 "labels",
                 "category_decisions",
@@ -359,12 +906,14 @@ if mode == "Review":
         st.session_state.current_message_id = pool_ids[
             (current_idx - 1) % len(pool_ids)
         ]
+        st.session_state["scroll_to_top"] = True
         st.rerun()
 
     if nav2.button("Next", use_container_width=True):
         st.session_state.current_message_id = pool_ids[
             (current_idx + 1) % len(pool_ids)
         ]
+        st.session_state["scroll_to_top"] = True
         st.rerun()
 
 
@@ -449,6 +998,13 @@ else:
                 "conversation_id": str(current.get("conversation_id", "")),
                 "first_user_message": str(current.get("first_user_message", "")),
                 "annotator_id": str(annotator_id),
+                "study_phase": str(current.get("study_phase", "")),
+                "batch_id": int(current.get("participant_batch_id", 0)),
+                "original_annotator_id": str(
+                    current.get("original_annotator_id", annotator_id)
+                ),
+                "is_reassigned": bool(current.get("is_reassigned", False)),
+                "reassignment_id": str(current.get("reassignment_id", "")),
                 "labels": ";".join(yes_labels),
                 "category_decisions": json.dumps(category_decisions),
                 "notes": notes,
@@ -459,11 +1015,14 @@ else:
             st.cache_data.clear()
 
             remaining_ids = [
-                x for x in pool_ids if x != str(current["message_id"])
+                message_id
+                for message_id in pool_ids
+                if message_id != str(current["message_id"])
             ]
 
             st.session_state.current_message_id = (
                 remaining_ids[0] if remaining_ids else None
             )
 
+            st.session_state["scroll_to_top"] = True
             st.rerun()

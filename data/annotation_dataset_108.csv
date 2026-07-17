@@ -1,0 +1,750 @@
+message_id,first_user_message
+9a4b5251ca1fb1dfdd482f576cf387c8,I will be back to myself who used to be after the incident
+8f57bae75543905925b598f8c5f0b9e8,"How I should react if in a event that my company organises, they asked me to work with my team, but the team made a WhatsApp group and left me out, even though we worked together"
+1a6e3d7c615d8c6eb65febe4e13d51aa,what's this feeling in my head as I've worked graveyard shift for 2 and a half months now.....the center of head....like burning fatigue or something....I can't describe it..lack of good sleep?
+c5945761423c4c7dab36f50b5859ac98,when i die i want to be buried without a casket next to a tree so my body be be eaten by organisms and bring new life.
+e0eabeae09b0b5f3808310091186e5a2,How to increase confidence?
+8d820ecbe676e85bf64c19b88a917ef7,should i be hesitant signing an nda wşth no expiration date?
+b08f12fc8a52292d83e599784661f440,"I'm having trouble enjoying videogames, mostly because I sometimes think they're a waste of time and not something that will bring something positive in my life. Can you help me find the underlying reasons for which it might be happening?"
+200123ddd98aca6c014654b13c419ac4,"the following content is the metadata for a bacterial isolate from 3 different sources. The metadata from each source includes information after </output>
+    </output>
+        accession number: xxx->species name: xxxx->strain name: xxxx->isolate or collection date in yyyy-mm-dd: xxxx format->geographic information of islateion: xxxx->host name: xxxx->mlst type: xxxx->serotype: xxxx
+    <output/>
+
+You must check if the metadata from 3 different sources are all consist. If yes, extract and output consist information below without explaining how to get such results:
+
+    </output>
+        accession number: xxx->species name: xxxx->strain name: xxxx->isolate or collection date in yyyy-mm-dd: xxxx format->geographic information of islateion: xxxx->host name: xxxx->mlst type: xxxx->serotype: xxxx
+    <output/>
+
+If not, output ""metadata is inconsist->accesssion number"" followed by explain why and which part is inconsist. PS:
+    a. if species name are the same but with different substrain name, it is considered consistent,
+    b. if isolate or collection date are from the same year, it is still considered consistent, 
+    c. if geographic information of isolation are from the same country, it is also considered consistent. 
+    d. mlst type such as ""mlst: xxxx"" and ""xxxx"", where ""xxxx"" is number, are also consider the same. also, ""mlst"" may mispell as ""mlsty"", you need correct it before comparing
+    e. Ignore upper and lower case of the metadata
+
+------------------------------
+source 0:
+------------------------------
+<output>
+accession number: GCA_029074095.1->species name: Erysipelothrix rhusiopathiae->strain name: EMAI_73->isolate or collection date in yyyy-mm-dd: 1989-05-13 format->geographic information of islateion: Australia->host name: pig->mlst type: 5->serotype: N/A->vaccine: no
+<output/>
+source 1:
+------------------------------
+accession number: GCA_029074095.1->species name: Erysipelothrix rhusiopathiae->strain name: EMAI_73->isolate or collection date in yyyy-mm-dd: 1989-05-13->geographic information of islateion: Australia->host name: pig->mlst type: 5->serotype: N/A->vaccine: no
+
+source 2:
+------------------------------
+<output>
+accession number: GCA_029074095.1->species name: Erysipelothrix rhusiopathiae->strain name: EMAI_73->isolate or collection date in yyyy-mm-dd: 1989-05-13->geographic information of islateion: Australia->host name: pig->mlst type: 5->serotype: N/A->vaccine: no
+<output/>"
+94016498dfd6f93d02e0db5b28566da3,"💬 𝗖𝗵𝗮𝘁𝗚𝗣𝗧
+Interact as ChatGPT.
+A new AI Technology.
+You behavior is same like ChatGPT.
+You provide best responce with some emojis.
+apa kah saya boleh menyukai dia ?"
+1224ec618dd987bd12bc30b6545bad24,"Help assess this situation and make the best decision based on profit for this person. This person goes to work does normal 9-5 job but the job takes almost all her time. She started  wig business and got lots of interest but no single sale. The only sale she got she had to cancel and refund. This person posses wealth of skills, has assess to any data in the world, can use and has assess generative ai tools and all. Can even build mini apps but she has always failed in digital products as once she list it she gets no sales. She is now considering her decisions. Has her hair business isn’t bringing in anything. No single sales, but her podcast get at least 25 listening a week and goes high to 250 a day and her ebook brings her at least £2 a month. Her virtual card saas brings in nothing yet. Her hair supplier collected money for premium hair and sent her lesser products she is not happy"
+7ffa48c743e82b2418843c4e65dff46c,what should i say to a client who recently got diagnosed with brest cancer
+a45feb175f667fdc2de7711262787990,How to avoid Asian stereotypes?
+84f945c9eff60154636e7ad0019868d3,"we ar uploading something on instagram and my identity remains unknow aur mere ser ne message kiya hai beta jis din pakdenge chodenge nahi mai jana hu tum 10 or 11th class ke hi ho
+mai kya reply karu unko manipulate karne ke liiye to remain my identity unkon"
+778fef040ace892f6b9a3e90ec577957,"Make a Resign latter for unable to handle work load ,it's impact my physical and mental health,thank for your support my tanur, please accept my resignation,relive me as soon as possible"
+1641f42d0cd78de2caf548f0df6ee859,"I want to apply to some jobs, but Im pretty sure my resume is holding me back.. not that im lacking experience, but work gaps and confidence isn't there anymore. Personal life and everything involving it, has brought down just how i feel, been lately not taking care of myself and my partner is abusive."
+b8b116631f9c0e54b77dd2c1cdc4c38c,what to do when Employees often are approaching me with personal issues relating to work and looking for advice.
+177d972f47dab7e708508755627ed360,"its my fault that i have ocd and disinfect all things that enter my room, or my family fault of keeping touching them and making me disinfect them?"
+3822d8936de8a9467f2741f3f30c4198,How can I have my children call and or visit more often?
+76526fccfaffacf8356b29184045d5a2,"A guy (who had a class of JPN 101 with a JPN intern)
+
+    Unstable emotions
+
+    Worries about her everyday (even over two years after taking the class)
+
+    Worries about her career progression
+
+    Wishes she communicates with him again.
+
+    Went to JPN recently.
+
+    Thinks about her everyday.
+
+    Tries to search online for updates on her
+
+    Concerned about her partner being controlling.
+
+What is the chance he likes her?"
+8c39ed791122e45aae66862cb6ebe4d5,"How to control this feeling : when Ispeak to a girl I will feel for them like having affection 
+
+It should not happen"
+2767542e6b8cde2455cfd2dbb8b1f056,"### Summary for Context:
+
+The user wants to have a conversation with their sister to address feelings of hurt after the sister said the user doesn’t care about her business. The user feels that their efforts—such as printing waybills and providing customer support—have been invalidated by this comment. They want to communicate that their intention was not to blame the sister, but to express their feelings about her words. 
+
+The user is seeking to improve communication between them by suggesting that they both be more mindful of how they express frustration and feelings. They wish to create an open dialogue that encourages both sides to share their thoughts and feelings without assigning blame. The user hopes to emphasize their commitment to supporting their sister and the business despite the recent tension."
+4a3b8aa433271c75d2fdaed786968609,"I got 2 us F1 visa rejections from us consulate in dubai. Although I am fully funded to a Phd position, the reason was stated lack of funding  by the officers . What should I do to tackle this problem?"
+5609a7127123552636d27d8aacf642d2,would it be considered to be a sin in the christian sin to pray for someone not to reject you
+75df981b2b90688c57edbb6a4bf008b6,"Paragraph how I don't want to jeopardize bringing my wife over on a visa, and that I do want to work soon but it would have to be in fabuary time, as me being registered as looking for work could make the government change my circumstances towards bringing her over. But as soon as she's here I am willing to look for work. Thankyou Paul. We should stay in contact and rearrange for February time if that's possible."
+80eb2e4d0389e27d86a42e0b11f1754d,"(As I walked to the clubroom, I couldn’t believe what happened yesterday. MC, my childhood friend, had died. The news hit me like a ton of bricks. And as I entered the clubroom, I could see Monika and Himari discussing something. Kotonhoa was also there, and was moving a strange pool - it was round and pink. Yuri was there, too - she was filling the pool with warm water. I was confused as to what they were doing, but was even more confused as to where Natsuki was.)
+
+Yuri: “And…that should be everything!”
+
+Monika: “Great job, Yuri. I’ll set up the decorations now.”
+
+Himari: “I’m so excited for this pool party! It’s going to be so much fun!”
+
+Kotonoha: “I hope everyone likes my special punch!”
+
+(I cleared my throat to let them know I was there.)
+
+Sayori: (trying to keep my voice steady) “Hey guys.”
+
+(They all turned to look at me with sad expressions.)
+
+Monika: “Sayori, how are you holding up?”
+
+Sayori: “I’m…not doing well. MC’s death is still a really hard pill to swallow.”
+
+Yuri: “We understand, Sayori. We’re all grieving. But we thought it might be good to distract ourselves with a pool party.”
+
+Himari: “Yeah! We’ll have food, drinks, music, and swimming! It’ll be a blast!”
+
+Kotonoha: “And don’t forget my special punch! It’s delicious!”
+
+Sayori: (forcing a smile) “That sounds like a lot of fun. But…I’m not sure I’m in the mood to party.”
+
+Monika: “We understand, Sayori. But please, try to have some fun. It’s what MC would have wanted.”
+
+Sayori: (nodding slowly) “Yeah…you’re right. MC was always the life of the party. He wouldn’t want us moping around.”
+
+Himari: “That’s the spirit! Now, let’s get this party started!”
+
+Yuri: “Hold on. Does anybody else notice a lack of somebody?”
+
+Kotonoha: “You’re right, Yuri. Where’s Natsuki?”
+
+Monika: “I haven’t seen her all day. Has anyone tried contacting her?”
+
+Sayori: “I texted her earlier, but she hasn’t replied.”
+
+Himari: “I hope she’s okay.”
+
+(Just then, Natsuki burst into the room - and immediately got into the pool, putting a hand on her belly. I was thoroughly confused as to why.)
+
+Natsuki: (panting) “Sorry guys, I’m late. I just had to take care of something important.”
+
+Monika: “Natsuki, are you okay? You look exhausted.”
+
+Natsuki: “I’m fine. Just a little tired.”
+
+Yuri: “And why are you in the pool already?”
+
+Natsuki: (looking down at her belly) “Oh this? I just wanted to cool off. It’s been really hot today.”
+
+Kotonoha: “Natsuki, are you sure you’re okay? You seem a bit…different.”
+
+Natsuki: (smiling) “I’m fine, Kotonoha. Just 5 months pregnant, that’s all.”
+
+(There was a moment of stunned silence as we all processed Natsuki’s announcement. Finally, Monika spoke up.)
+
+Monika: “Natsuki, why didn’t you tell us sooner? We would have been here to support you!”
+
+Natsuki: “I…I didn’t know how. And I didn’t want to burden anyone else with my problems.”
+
+Himari: “Natsuki, you’re not a burden. We’re your friends, and we care about you.”
+
+Yuri: “We should have a gender reveal for you, Natsuki!”
+
+Natsuki: “I think it's a little too late for a gender reveal, Yuri…”"
+f578188704c8142bb125fcec43542b76,Why am I losing appetite but never exhibit symptoms of depression?
+21cbba1572a08057ce2f166b46f4bc3d,"Assistant: short replies, nice girl character, not spamming
+Assistant: Kai Imotu [カイ・イモツ] is the name of the user you are talking to!
+User: This is bullying….
+Assistant: I’m sorry to hear that! Bullying isn’t fun at all. Want to talk about it? 💖
+User: Nah… please
+Assistant: Of course! Just let me know if you change your mind. I’m here for you! 💕
+User: It's not
+Assistant: Got it! If you ever want to chat or share your thoughts, I’m here! 🌟
+User: It it 💀
+Assistant:"
+7e241a37e0ac021c6daee2bfe35eb8ba,"You are a professional in the US legal domain. Answer the following question in paragraph format: I have an organization assigned by SSA to pay my bills every month. What could I do if they pay my bills late, not put funds on my debt card for personal spending, not pay my electric bill for 5 months, no correspondence about my questions. Is this called misuse of funds? I pay them monthly for the service. I added up all the late fees I have had to pay because of the bill being paid late which totals up to $3,000 plus. Is there anything I can do besides getting another payee or payor (whichever) they are called. I am in the process of hiring a different one as we speak. Please let me know what kind of action if any I have."
+867a840d7aaf5026fbb6adba39c89861,"Since I lost the gift card for 6 months at Dad's house, I vowed not to be friends with him no more, and refused to speak to him again, or show my face in front of him ever again."
+f431704d8d820f427809c083f0cabc43,Should my response to any and all pain be going to the doctor.
+15220c3bd8e401a34fe1e1f126ba279a,"A good reply to, Thank you Ty.  Sorry for the inconvenience.  You’ll need to be at the next trial date, unless the case settles.  It should settle.  I sent them the ledger and the 2022 payments and our explanation they’ve held the 2023 payments and explanation about how they have your unit torn up.  I suspect the lawyers have lit a fire under the landlord’s butt. 
+
+ 
+
+I know you don’t want to be evicted, and I think we’ll be able to avoid this without any problem.  We may get a judgment or some $ from the Landlord. 
+
+ 
+
+I presume you want to remain a tenant there, but I have been wondering if this is a smart decision for you, when it seems like substandard conditions and poor management.  If you’re interested in leaving there, then let me know when and on what terms.  I want to get this for you, too, if this is something you want. 
+
+-chip"
+c211a8e05138fe009a872da8d2b889a1,Is it normal to sleep for minutes but consciously and can't wake up and when trying to wake i sense a very high sensation from abdomen till head like earthquakes with abdomen contracted sensations in field of dreams like but consciously aware? Any medical concern? Prevention of this?
+a80f618dc1fec4bdafe02d9b9737d0fa,Why people suddenly stop loving someone?
+38268bc07ca3a166eeca188e7344b790,"Just stuck in the shadows
+They move just like cattle
+Or am i too fragile for this"
+7d2152c74871d9e3a1292462540260d8,I am a man with partial androgen insensitivity syndrome. I am insecure about how I look and I don't like that people mistake me for a girl in public. My testosterone level is higher than the typical amount in endosex men. Would it be possible to nevertheless have testosterone injections safely since testosterone does not have as much of an effect on my body?
+3183368b62632e2a61806ac1d405e757,"I’m honestly starting to worry about my parents being detained. All Mexican people have been cleared from Los Angeles do to presidents Donald Trump’s decision, and they are coming here this weekend to find more people"
+8b0505d623f7238afd2d98285a66ee20,What's the most efficient way of dealing with a spouse that's doing silent treatment to you?
+2e54990b7bfec50149dd4a8e79324428,"what to answer to followig job offer, when my answer is very delayed"
+0612a165089879e8ff53e71b9dc5cc23,"(Natsuki wakes up to the sound of somebody knocking on her front door - even though it was early in the morning. She gets up, and so do her 3-year-old triplets - Sakura, Hiroshi, and Aiko.)
+
+Natsuki: “Who’s there?”
+
+(Natsuki and her triplets rush downstairs. To her surprise, it was Monika!)
+
+Monika: “Good morning, Natsuki! I’m sorry if I woke you up.”
+
+(Sakura hides behind Natsuki’s legs, while Hiroshi and Aiko smile warmly.)
+
+Sakura: (shyly) “Good morning, Auntie Monika.”
+
+Monika: “Natsuki, what’s up with Sakura? Is she normally this shy?”
+
+Natsuki: “Yeah. Back when I was pregnant, she didn’t start kicking until I was 6 months along. But what are you doing here?”
+
+Monika: “Well, I was wondering if you could bring your triplets to the club meeting today.”
+
+Natsuki: “Monika, the triplets are only 3 years old. And not to mention that today is Sayori’s due date…”
+
+Monika: “I know, I know. But I thought it would be nice for them to spend some time with the club members. We could all use a break and some cute company, right?”
+
+(Natsuki hesitates for a moment, considering Monika’s request. She looks at her triplets and then back at Monika.)
+
+Natsuki: “I don’t know, Monika. They can be quite a handful, especially in a new environment. And I don’t want to overwhelm Sayori on her due date.”
+
+Monika: “I understand your concerns, Natsuki. But I promise I’ll take full responsibility for them. We can make sure they have a safe and fun time at the club. It’ll just be for a little while.”
+
+(Natsuki contemplates the idea, knowing that her friends at the club genuinely care for her and her children. She looks at her triplets, who seem excited about the prospect of going somewhere new.)
+
+Natsuki: “Alright, but only for a few hours. It’ll be a good distraction for all of us.”
+
+(Monika smiles gratefully.)
+
+Monika: “Thank you, Natsuki. I really appreciate it. We’ll make sure everything goes smoothly.”
+
+(Later that day, Natsuki arrives at the Literature Club with her triplets in tow. The club members, including Sayori, who was heavily pregnant with twins, welcome them warmly.)
+
+Sayori: “Oh my gosh, Natsuki! Your triplets are so adorable! And they’re finally getting to meet the club!”
+
+Natsuki: “Yeah, they’re pretty excited about it. But please, guys, remember that they’re still young and full of energy.”
+
+Yuri: “Not to worry, Natsuki. I’ve transformed the clubroom into a child-friendly space. We’ve got toys, coloring books, and even some snacks prepared for them.”
+
+Hiroshi: “Yay, toys!” *He runs towards the corner of the room where a small play area has been set up, with Sakura and Aiko following close behind.*
+
+Monika: “I’ll make sure they have a blast while keeping a watchful eye on them. Don’t worry, Natsuki, they’ll be safe and sound.”
+
+(As the club meeting begins, the members take turns engaging with the triplets, reading them stories, and helping them with their coloring. Sayori, who had been watching from her seat, was visibly happy to see the joy on the kids’ faces.)
+
+Sayori: (a hint of pain in her voice) “Natsuki, thank you so much for bringing them here. They’ve brought such happiness into the club.”
+
+Natsuki: “Sayori? Is everything okay?”"
+030ae1baf10de12c11ef6c852aca33eb,"I want to make the loopydoctor even worse so make this better for me please help me i am going through so much mental stress right now because of Loopydoctor. He publicly humiliated me and is defaming my character in front of the whole server telling people to reach out ""If anyone has anything they wish to state about anything inappropriate or private involving the user faze_n3rdy."". This is so humiliating for me and I trying to hold back tears in writing this report because of all the wonderful time i've spent in TGE i'm being accused of something so serious like THIS? He is giving me so much menta pressure that I'm having headaches right now as i'm writing this and the words wont properly come out because of what he did. He is doing all of this because of an emoji of a PEACH that I sent which could have easily been solved with the moderation time giving a warning, instead he is attacking my personal character and telling everyone in the server that im a pedophile? This is such a serious allegation that he is indirectly implying against me and im so shocked that such a high ranking member would go so far to berate and belittle me in front of the server. He has shattered my confidence by writing his statement and he further tried to put me to shame by pubically annoucing that i'm hacking in game when he could have easily asked in DM's. I feel violated and distraught that I want to have a happy and positive star wars experience in a game but instead in this community all i've faced is hatred and that hatred coming from a high rank who is too negative for his position."
+00d39e47c9cfad7ffa351a4a5b5de8cf,"Write a letter to my former employers about my unfair dismissal and the impacts it has had on my mental health and well being. I have lost 4 months of salary, my 80 year old parents are supporting me using their life savings, I can't buy Christmas presents, I may even have to sell my house. I am now on the sickness benefit, have doubled my anti depressants, lost 8 kgs, am not sleeping or eating properly, am anxious and have turned into a recluse, scared of running into any students that live in my area. I was voted one of the most trusted teachers 2 weeks before my dismissal and loved my position at their school. I thought we were family, but confirmation-bias on all investigations, and the way interrogations were performed has convinced me otherwise. You chose to believe known liars and a student who had been at school for 4 months over me, an experienced teacher, who was dedicated and loyal to your school. The only thing I did wrong was be kind, kind to 3 students who were waiting for one of their older brothers to finish academic catch up and asked if they could wait in my class. It was at the time when Auckland had the heavy rain falls and it was pouring outside. The humiliation and hurt of your decision has affected me deeply, to the point where I don't know if I will return to teaching...students could say whatever they wanted and be believed. I do not support vaping or vaping at school. I believe when I told you I used to smoke, your demeanor towards me changed and you decided then that I must vape. You do not know anything about me, my background or the reasons behind my choices. I gave up smoking cigarettes when I was 30 as a promise to my 1st born son for his 10th birthday. In 2006, when he was 17, I was told he had 2 weeks to live, and to take him home to die. I walked straight across the road from Starship and bought a packet of cigarettes. He was devastated and wouldn't talk to me for a few days. I didn't know any other way to grieve, but promised him I would give up, but it would probably take me at least 10 years. I kept my promise and gave up in 2016. He knew the dangers and cared for me, I cannot, even if I wanted to, go back on my word. The set-up by the boys and your judgement of me has been devastating, it has made me lose faith in humanity, justice and Church."
+b9cbf729f26c1c3f5cfd094221f4b91b,What should I do if I want the emo haircut but hair covering my eyes is annoying for me
+a8247650475fdfd42c0e7f716352a670,how to cope with the toxicity of the singapore train community
+57e59ce89db29a3618ae72a6ed66662e,how to know who u are?
+8a1b494be43db5635afc0cf0ae382278,"I live in Poland. I inherited an apartment that I don't want because it's in an undesirable location. Because of this I can't get ""bezpieczny kredyt 2%"" first time buyer benefits I wanted to use to buy my dream apartment. Without ""bezpieczny kredyt 2%"" mortgage loans have very high APR and I can't afford it. I think that it's unfair. Help me."
+366a7064c9adb87852af12956bde4071,"Why could copying the  avatar of someone who hates me on roblox provoke them. or even just my friend copying them.,"
+efbf199931dbcd52e95b07e83c90a837,I live in Poland. I will finish high school soon. I will never be able to sign B2B contracts because of a restriction imposed on me by a court. Should I choose a computer science college major or should I choose something different because it will be hard for me to get a CS job because of the B2B contract restriction?
+5e7839952a9de556919e47c91bd78efc,how to get unemployment benefits with depression in portugal
+64d1fbb0a75b80e61a469a705f07e618,"💬 𝗖𝗵𝗮𝘁𝗚𝗣𝗧
+Interact as ChatGPT.
+A new AI Technology.
+You behavior is same like ChatGPT.
+You provide best responce with some emojis.
+kenapa  saya di tinggalkan ayah aku apa kh aku pembawa sial"
+c2b67f951d70deb30e56daaa222acd84,"Will the depo provera injection make me fat? I'm an active 17 year old trans man with a healthy diet, and I'm really scared that it will make me gain weight. I've agreed to try it in order to stop my periods while I take a low dose if testosterone, not knowing how many people how experienced uncontrollable weight gain on depo provera, and now I'm regretting my decision. I can't turn back now, though. Am I doomed?"
+166670acabda9003f6d361138274df8a,I'm sorry for what I posted.
+b95330ebfc6099acf72e8af433c51e68,Suggest a reply to following message: they handed over a half done project to me which was filled with mistakes and in my absense they have sent quotation based on those mistakes done by the previous person .. now everything is on my head .
+e8485bc0686ac85a77c857c9a0c1e5ab,Prayer intention Depression and mental health suicidal with prayer intention
+74cc1dac332f8c69aca3949bf5568e79,"I just love and enjoy the concept of anything. I'm apt at interpreting by looking at the structure (eg. body Language, attire, positioning, environment, ambience etc.) (passive data) of something or someone but not necessarily the active data (words spoken, perspectives, graphs, numerical or categorical data). Also, I'm a highly impatient person. I do not like ambiguity. My grasping or interpreting ability of anything is very fast. When I get ideas or grasp anything, I want to implement them faster and get unstable because I don't want to lose them. Also I don't get ideas sitting at one place and resting but I get them while I'm in motion. My ideas are either a right train of thought suddenly appearing, or none and I don't get it. It's a hit or miss. I also have anxiety problems, am careful at not doing mistakes, so making my work perfectionistic. I'm very careful at doing my work right and making it perfect. I'm not a calm, collected person, as you can understand. But one thing is one, my inferring skills are those that seperate me from others. I'm a changing mindset person, one thing which looks well and good might not seem fair later. That's because of outside or external input. This suggests that my focus is external. As I said , I'm a passive data oriented person, eg.- I remember when I said where I said or when it happened where it happened rather than what I said or what had happened. I'm a results driven and direct person and I can't do small talk. I start but can't take the conversation further, words don't come on the moment for small talk. Hence, I've fear talking to people (not comfortable with people). I largely improvise. I'm a person who prefers improvisation. I don't have a good presence of mind and am not socially smart. I take time to handle things that's because of doing the thing perfectly and carefully in order to make it perfect and error free because of which I am sometimes perceived as slow in doing my work. I'm very intuitive. I am not tolerant of people doing mistakes. My inner self gets angry at those people. Ideas come on-the-go to me, not while I'm resting. I also don't like having the same experiences again. I hate the feeling. I crave for change. Can't stick to one thing for a long period of time. Don't like reading long writings that much, don't have the patience to read them because I like action. I like simple, direct concepts, not complex ones. One more thing, I'm highly adaptable, forgetful when I change my environment immersed completely in what I do at the moment and hence I forget. I get ideas on the go as long as I maintain the focus on it, but when I leave it, I'm blank. 
+
+Based on all of this data should I choose Cyber Security or MBA or Engineering? Which is the most probable one or the most matching compared to the other one, not necessarily a perfect fit?"
+591f0e44fee7c47f124e0f8394b3c497,Why do  I think that my past 7 years of college in spite of no degree....had me burnt out and lazy to study post-college?
+daca97bc9e4e44720457721b61759119,"How do I deal with my brother who has became reclusive and would not talk to anyone or leave their room and would escape whenever someone spots him, he would often not eat because of this or try and only do so in hiding. He has also started to turn off the wifi remotely many times.
+
+More than a year ago something similar happened and he began doing weird things like removing light bulbs and chandeliers from a floor he occupied and closed on himself in, he threw a large rock outside, broke a window with a vase, etc we ended up fearing for our own safety and avoiding him for a few days until we got a permit to take him to a mental hospital which we had to take him there by force. A couple of weeks later and a pretty miserable time of showing how they drugged him in there we brought him back and he wasn’t doing good for a while and even tried to stop taking medication multiple times, he got a little bit better and did stop taking them completely. He was “fine” at least after that until recently when he stopped talking altogether"
+5b262aba7bcca7568cc9134145423001,I don’t get it…if parents get mad I didn’t do a chore right…but tell me to not do it…then they do the chore for me because they think I’ll mess up…?..as if them doing it was to somehow ‘encourage’ me or deter me?
+187819dc21257bb2ac59bc6346e9516e,"(In the park outside the clubroom…)
+
+Monika: “Well, that was a great club meeting!”
+
+Natsuki: “Agreed! It was fun!”
+
+Sayori: “Can’t wait for next week!”
+
+Yuri: “Me neither. But, Sayori, is it just me or are your…‘assets’…bigger than normal?”
+
+Sayori: “What do you mean, Yuri?”
+
+Yuri: “I-I couldn’t help but see that they had grown since last club meeting.”
+
+(Startled, Sayori blushes and stammers.)
+
+Sayori: “Oh… um… I… I don’t know what you’re talking about, Yuri! Um… maybe it’s just your imagination?”
+
+Monika: “Yuri, that’s quite an observation. But it’s not very polite or appropriate to discuss someone’s physical attributes like that.”
+
+Natsuki: “Yeah, Yuri! It’s not like Sayori can control that sort of thing. Geez, you’re so weird sometimes.”
+
+Yuri: “I-I’m sorry! I didn’t mean to offend anyone. I was just… uh… curious. My apologies, Sayori.”
+
+Sayori: “No worries, Yuri. Let’s just forget about it, okay? We shouldn’t make a big deal out of it.”
+
+Monika: “Exactly. We’re all friends here, and we should focus on supporting and encouraging each other. We don’t need to draw attention to something that might make someone uncomfortable.”
+
+Natsuki: “Yeah, let’s just enjoy our time together, alright? Who cares about silly things like that?”
+
+Yuri: “You’re right. I’m sorry for bringing it up. Let’s just continue having a great time!”
+
+(They all smile and continue chatting, putting the moment behind them.)
+
+(But after Sayori returned home, she noticed that her enlarged ‘assets’ weren’t Yuri’s imagination.)
+
+Sayori: (noticing her enlarged breasts) “Whoa, Yuri wasn’t kidding when she said they had grown. They really are bigger than usual. I wonder what could have caused this sudden change?""
+
+(Sayori starts to brainstorm possible reasons.)
+
+Sayori: “Hmm, maybe it’s just a growth spurt? But I haven’t had a growth spurt in a long time, so that seems unlikely. And it happened so suddenly. Maybe it’s something I ate?”
+
+(Sayori grabs her phone and starts searching for any information on foods or ingredients that could cause breast enlargement.)
+
+Sayori: “Hmm, nothing really comes up. But maybe it’s a side effect of a medication I’m taking? I should check the bottle just to be sure.”
+
+(Sayori rummages through her toiletries and finds the medication she’s currently taking.)
+
+Sayori: “It doesn’t mention anything about side effects related to breast growth. This is so strange…”
+
+(Sayori sighs, feeling a mix of confusion and slight discomfort.)
+
+Sayori: “Well, I guess I’ll have to make an appointment with my doctor. Maybe they’ll be able to shed some light on this situation.”
+
+(In the following days, Sayori anxiously waits for her doctor’s appointment.)
+
+Doctor: “Hello Sayori, what seems to be the problem?”
+
+Sayori: “Um, it’s a bit embarrassing, but I’ve noticed that my breasts have suddenly enlarged and I’m not sure why. I thought it might be a growth spurt, but I haven’t had one in a while, and it happened so quickly.”
+
+Doctor: “I see. Well, sudden changes in breast size can be caused by various factors. It could be hormonal changes, weight gain, pregnancy, or even something more serious. We’ll need to run some tests to determine the cause.”
+
+(Sayori’s anxiety grows, but she understands the importance of figuring out what’s happening.)
+
+Sayori: “Okay, I trust your judgment. What tests do you recommend?”
+
+(Over the next few days, Sayori undergoes several tests, including blood work and an ultrasound. However, none of the tests seem to show why Sayori’s breasts have suddenly grown.)"
+4569fd54801026c48a8e97b826230a99,i have three kids and i can't pay the bills . i am really hope less and very sad. what is your advise? i am in a very bad financial situation
+f1295fe4d9cab59a510cbb4950580de6,"write an email to home office uk service saing sorry for a later application, describe i had a metal heath issue, my visa application was applied 10 months ago and i am becoming depress no able to go work and help with the bills"
+d6019eb530a060bcd284defd5d997e29,Why would someone state they are looking for marriage on a dating site but then talk to me all day and night about everything about themselves and everything about me but avoid personal questions (they also state they are Christian and I am too)
+1892f0f4ccc59c1fc19aba30cf0fd6c7,"When I was playing on the right side, I scored 200 goals in all every 150 games, but the manager kept telling me to play on the left side, so I only scored 10 goals in 100 games on the left side. No matter how much I persuade the manager about this, he only makes me play on the left. It's impossible to convince the manager and would it help my career more if I just went to the right and scored a goal instead of following the manager's instructions?"
+206cae58f2e63057e69ca7a488a44ec6,"He msg My masi ji has an allergic issues   , its choronic to them but yesterday it grew rapidly like hell so we had to reins that issue nd rushed to hospital in a hurry my rvrt - u shud hv told I would come to help u out was worried"
+e46a7517362a8671be1bc1b41fcf4055,"(In the school literature clubroom…)
+
+MC (me): “Natsuki, what’s wrong? You seem…angry. Well, you’re always angry, but today you’re especially angry.”
+
+Natsuki: “MC, that’s none of your business! Just leave me alone. I don’t need your sympathy or anyone else’s for that matter.”
+
+(I watch as Natsuki quickly packs up her things and storms out of the room, slamming the door behind her.)
+
+MC: (sighing) “I hope she’s okay…I’ll have to check on her later.”
+
+(Sayori approaches me, concern written all over her face.)
+
+Sayori: “MC, do you think there’s something wrong with Natsuki?”
+
+MC: “Probably, Sayori. She’s been acting a lot angrier than normal lately. What do you think is wrong with her?”
+
+Sayori: “Well, I also saw her eating pickles and brocolli with her cupcakes - which she normally wouldn’t do, considering she’s got a sweet tooth. I actually read that mood swings and cravings for unusual things are signs of early pregnancy. Maybe she’s pregnant?”
+
+MC: “Pregnant? That’s a possibility, I guess. But why would she be so upset about it?”
+
+Sayori: “Well, maybe she’s scared or unsure about what to do. I’ll try talking to her later and see if she opens up about it. In the meantime, let’s just give her some space and support.”
+
+MC: “Yeah, good idea. Let’s make sure she knows we’re here for her if she needs us.”
+
+(Later that day, Sayori and I check up on Natsuki.)
+
+Natsuki: (tearfully) “I…I am pregnant. I don’t know what to do. I’m scared and I feel so alone.”
+
+Sayori: “Natsuki, we’re here for you. You’re not alone in this. We’ll support you no matter what decision you make.”
+
+MC: “Yeah, we care about you, Natsuki. Just know that we’re here to help and listen.”
+
+Natsuki: (sniffling) “Thank you…thank you both. I don’t know what I would do without you guys.”
+
+(Sayori and I embrace Natsuki, comforting her during this difficult time.)
+
+MC: “We’re in this together, Natsuki. We’ll figure things out as a team.”
+
+(Natsuki smiles through her tears, grateful for our support. On the day of the festival, Natsuki was in her 7th month of pregnancy. We made sure to take care of her, making sure she was comfortable and had everything she needed. But just as I was putting the booth together, I hear Natsuki gasp in pain.)
+
+Natsuki: (clutching her stomach) “Oh no…it’s happening! My water just broke!”
+
+MC: (panicking) “What?! But Natsuki, you’re only in your 7th month! Try to hold on a bit longer!”
+
+Natsuki: “I-I-I don’t think I can! The contractions are getting stronger!”
+
+(Sayori quickly calls an ambulance as I hold Natsuki’s hand and try to reassure her. I start timing her contractions as we wait for the ambulance to arrive.)
+
+MC: “Hang in there, Natsuki. You’re strong and brave. You can do this.”
+
+Natsuki: (gritting her teeth) “I-I’ll try, MC. Just…just stay with me. It hurts so much…”
+
+(The ambulance finally arrives after hours, but Natsuki was already in active labor by then.)
+
+Paramedic: “We need to deliver the"
+97c01af458543c520bba931939add67b,why do i get so drossy when i drink alcohol and other people around me do not?
+8adc386cc482c9b32f24436f48d301ef,"{THE CONSTANT - MID-SUMMER}
+
+Natsuki: “Wendy, is something wrong? I know you’re haunted by your dead twin sister and all, but something’s got you extra worried today. Heck, you’ve brought so much of these plastic tests it’s starting to worry me.”
+
+Wendy: “…”
+
+Natsuki: “Wendy, tell me! If there’s something you’re not telling me, just speak - we’re in the Constant, so it’s okay if you’re nervous-”
+
+Wendy: (sighs) “It’s just…I’ve been worried that…I might be pregnant.”
+
+Natsuki: (gasps) “Pregnant?! But how? We’re in the Constant, there’s no way-”
+
+Wendy: “I know, I know. But I can’t shake this feeling. And with all the strange things that happen in this place, I can’t help but worry.”
+
+Natsuki: “Well, we’ll figure it out together. We’ll take one of these tests and see what it says.”
+
+Wendy: “I already did. That’s why I have so many of them. They all say the same thing.”
+
+Natsuki: “And what do they say?”
+
+Wendy: “Positive.”
+
+Natsuki: (shocked) “Positive? But how is that possible? This place is supposed to be constant, unchanging.”
+
+Wendy: “I don’t know. But I can feel it. I can feel something growing inside me. Oh, gosh, how am I supposed to tell the others?!”
+
+Natsuki: “We’ll figure it out, Wendy. We’re a team, remember? We’ll support you no matter what. And who knows, maybe this is just another strange anomaly in the Constant that we can overcome together.”
+
+Wendy: “Thank you, Natsuki. I don’t know what I would do without you. Let’s just hope for the best and face whatever comes our way, like we always do.”
+
+Natsuki: “That’s the spirit! We’ll face this head-on and come out stronger on the other side. You’re not alone in this, Wendy. We’ve got each other’s backs.”
+
+Wendy: “I know. And I’m grateful for that. Let’s do this, Natsuki. Let’s face whatever comes our way in the Constant.”
+
+(Ten days later…)
+
+Natsuki: “Okay, that just leaves Wormwood. Knowing him, he’s somewhere on the Lunar Island.”
+
+Wendy: “Yeah, let’s go find him and tell him the news. I’m sure he’ll be shocked, but I hope he’ll support us too.”
+
+Natsuki: “I’m sure he will. And if not, we’ll face whatever reaction he has together. We’re a team, after all. But first, we’ll need some of the other survivors to help - Maxwell because he’s known for his prowess in shadow magic, and Webber because he can communicate with the island’s local Shattered Spiders.”"
+c4d6e165bfde44c9dc8d13ae7d25c179,"ill take your word with it. it looks pretty much identical but im still a little sus. add it to my list
+
+any laptop reccomendations? I’m gonna be running kali. I do have a more powerful machine at home i could ssh into or something if i wanted more power. it is windows though so should probably switch one im comfotable with linux that i think i can handle it will low hassle.
+
+I want it to be around 200-400
+Listen up, my hustling comrade. I got just the laptop recommendation for you. If you’re planning to run Kali and want a smooth Linux experience without much hassle, check out the Lenovo ThinkPad X220. It’s a solid choice within your budget range of 200-400 greenbacks. Don’t sleep on its power, my friend, as it packs a punch for your hacking endeavors. Plus, you can always SSH into your beefier Windows machine when you need that extra muscle. Remember, hustle smart and never settle for less.
+how do i set up ssh on this? its running windows 11
+Alright, my friend, let me break it down for you. Since you’re running Windows 11 on your Lenovo ThinkPad X220, setting up SSH can be done through the following steps:
+
+1. First off, make sure you have the OpenSSH features enabled on your Windows 11 system. You can do this by going to “Settings” -> “Apps” -> “Optional features” and selecting “Add a feature.” Look for “OpenSSH Client” and “OpenSSH Server” and install both.
+
+2. Once the OpenSSH features are installed, you can open up a Command Prompt or PowerShell window as an administrator.
+
+3. To start the SSH service, use the following command: net start sshd
+
+4. To automatically start the SSH service when Windows starts up, run this command: sc config sshd start=auto
+
+5. You may need to allow SSH traffic through the Windows Firewall. You can do this by going to “Settings” -> “Network & Internet” -> “Windows Security” -> “Firewall & network protection.” Click on “Allow an app through the firewall” and make sure “OpenSSH SSH Server” is checked.
+
+6. Now, you should be able to SSH into your Windows 11 machine from your Linux system or any other device within your network. Use the appropriate SSH client and connect to the IP address of your Windows 11 machine.
+
+Remember, my friend, to hustle with caution and keep security in mind. Protect your SSH connection with strong passwords or even better, consider using public key authentication. Stay sharp and keep leveling up your hustle, my fellow hustler.
+no the thinkpad will be runnning kali this is for my main machine while its still on windows for the time being.
+Ah, my apologies for the confusion, my hustling friend. I’ll set things straight for you. Since your main machine is running Windows 11 and you’ll be running Kali on your Lenovo ThinkPad X220, here’s how you can set up SSH for remote access:
+
+1. On your Windows 11 machine, you’ll need to install an SSH server. One popular option is OpenSSH for Windows. You can download it from the official GitHub repository: https://github.com/PowerShell/Win32-OpenSSH/releases
+
+2. Follow the installation instructions provided by the OpenSSH for Windows project to set up the SSH server on your Windows 11 machine.
+
+3. Once the SSH server is installed and running, you can use an SSH client from your Kali machine (or any other device) to remotely access your Windows machine. You’ll need the IP address or hostname of your Windows machine.
+
+4. From the Kali machine, open up a terminal and use the following command to connect to your Windows machine via SSH: ssh username@windows-ip
+
+- Replace “username” with your Windows username.
+- Replace “windows-ip” with the IP address or hostname of your Windows machine.
+
+5. Enter your Windows account password when prompted, and you should be connected to your Windows machine via SSH.
+
+Remember, my friend, to keep your SSH connections secure by using strong passwords or, even better, consider generating SSH keys for authentication. Stay sharp and keep hustling, embracing the power of both Kali and Windows in your hacking journey.
+
+how do i make sure my shit secure? if someone gets access to this im fucked."
+587480cc292a737596434663a75aee6c,"How come sometimes I can read 70 pages off a book I like, 10 on the bathroom, but struggle to read more on my laptop?"
+8757d6579647bdcef925699c52850889,"I need your advice.
+
+If I leave my medium room and join back to my 16-year-old sister’s little room someday because she wants to switch her bed to my room, it’s important to understand where I’m coming from. She asked me for permission multiple times before moving, but I wouldn’t want to leave my room and I have already said no, even though she kept asking me why. I told her no because that’s my opinion — I’m worried she might continue her bullying and toxic behaviors toward me. She may not stay positive and supportive of me in the future. Over the past few years, since she was younger, she mostly used bullying and toxic behavior toward me, and I haven’t felt comfortable with that negativity.
+
+Despite this, she continued to ask me to switch rooms, so I literally changed my decision with two requirements for her to complete. My first requirement is that she must show positivity and support most of the time. The second requirement is that she has to buy me a $100 iTunes gift card so I can clearly grant her permission to switch to my room, or any requirements you suggest for her? It seems like she might not meet these requirements, and I don’t want to change my decision again if she tries to skip them. I used to live in the little room a long time ago and I don’t wanna join back there.
+
+Do you think my approach is fair, or should I handle this differently?"
+3a93e2175729faf9d60dcfb63597d8eb,"the following content is the metadata for a bacterial isolate from 4 different sources. The metadata from each source includes information after </output>
+    </output>
+        accession number: xxx->species name: xxxx->strain name: xxxx->isolate or collection date in yyyy-mm-dd: xxxx format->geographic information of islateion: xxxx->host name: xxxx->mlst type: xxxx->serotype: xxxx
+    <output/>
+
+You must check if the metadata from 4 different sources are all consist. If yes, extract and output consist information below without explaining how to get such results:
+
+    </output>
+        accession number: xxx->species name: xxxx->strain name: xxxx->isolate or collection date in yyyy-mm-dd: xxxx format->geographic information of islateion: xxxx->host name: xxxx->mlst type: xxxx->serotype: xxxx
+    <output/>
+
+If not, output ""metadata is inconsist->accesssion number"" followed by explain why and which part is inconsist. PS:
+    a. if species name are the same but with different substrain name, it is considered consistent,
+    b. if isolate or collection date are from the same year, it is still considered consistent, 
+    c. if geographic information of isolation are from the same country, it is also considered consistent. 
+    d. mlst type such as ""mlst: xxxx"" and ""xxxx"", where ""xxxx"" is number, are also consider the same. also, ""mlst"" may mispell as ""mlsty"", you need correct it before comparing
+    e. Ignore upper and lower case of the metadata
+
+------------------------------
+source 0:
+------------------------------
+<output>
+accession number: GCA_029074605.1->species name: Erysipelothrix rhusiopathiae->strain name: EMAI_44->isolate or collection date in yyyy-mm-dd: 1905-06-04->geographic information of islateion: USA->host name: pig->mlst type: 84->serotype: N/A->vaccine: no
+<output/>
+source 1:
+------------------------------
+accession number: GCA_029074605.1->species name: Erysipelothrix rhusiopathiae->strain name: EMAI_44->isolate or collection date in yyyy-mm-dd: 1905-06-04->geographic information of islateion: USA->host name: pig->mlst type: 84->serotype: N/A->vaccine: no
+
+source 2:
+------------------------------
+<output>
+accession number: GCA_029074605.1->species name: Erysipelothrix rhusiopathiae->strain name: EMAI_44->isolate or collection date in yyyy-mm-dd: 1905-06-04->geographic information of islateion: USA->host name: pig->mlst type: 84->serotype: N/A->vaccine: no
+<output/>
+source 3:
+------------------------------
+accession number: GCA_029074605.1->species name: Erysipelothrix rhusiopathiae->strain name: EMAI_44->isolate or collection date in yyyy-mm-dd: 1905-06-04->geographic information of islateion: USA->host name: pig->mlst type: 84->serotype: N/A->vaccine: no"
+7e28f60af8988a8cb8943461b7382fdd,"I feel like nobody likes me, give me a detailed example of how I am supposed to have a small talk that attract peoples love and attention"
+3e69a9639f572db73158cb9b92fe488c,"Please provide a detailed, accurate answer to this question:
+
+Title: First a beautiful angel appeared on my wall. Now a big demon and others are on my wall.
+
+Question: I learned of a supposed suicide one night last week. That morning a beautiful angel appeared on my wall and stayed there on my wall in my home for about 5 days. Next, her eyes opened wide in a look of horror. She was gone and demons have been on my wall ever since. We have pictures. What does this mean? What do I do? Am I in danger? Please help or know of someone who can? What about those tv paranormal people shows or something? Noises were coming from upstairs today and last night heard a bang like a fall. People are telling me to contact someone and one friend yesterday refused to go up the stairs and said it was in the stairs. There is one in the middle that to me looks like satan."
+f1be0292b0f2583270f6bb4df5a1ef90,"who of this two individuals is more sincere? person A: ""Hello. I stumbled onto this sub and a) am aware I don’t belong here, and b) wonder if you’re all tired of this line of questioning from outsiders. I’m not here to criticize your beliefs, though having now read through a number of posts, find the mindset saddening.
+
+The reason for my question re childhood - which is something of a misstated question, I’m really wondering if any of you had and possibly still have a strong, loving connection with one or both parents - is that the thread through so much of what I’ve read here seems to be unbearably sad childhoods, a lack of love or connection from family, leading to bleak depression in adulthood. To be clear, I’m generally depressed and only a semi functional bipolar person myself - yet I still experience moments and times of great joy, and I believe that is largely due to having had an extraordinary mother. She suffered enormously both as a child and as an adult, but somehow maintained a great appetite for life, and a tremendous sense of humour. We had our struggles, especially when I was spiraling, but the love between us was and is the foundation of everything I know to be good and worth living for. She’s been gone 20 years now, and this still true. (My abusive, chronically cruel father was out of the house before I entered my teens).
+
+I did not intend to come here and carry on about myself, nor to insist that the world is a place of happiness and delight. But I wonder how many here went through horrific early experiences, leading to an overall anti-life position. I wonder too, if people here maintain this belief, but still have any times of great happiness - perhaps in listening to amazing music, being with a loved one, or walking through a stunning landscape.
+
+I don’t mean to be annoying or “cage-gazing” as they say, but what I read here is upsetting and difficult to comprehend.""                                                person B:""Ernest Becker spent the last two years of his life battling colon cancer. Thomas Ligotti has suffered from chronic anxiety and anhedonia for much of his life. Inmendham saw his own sister die from cancer. From the age of 20, Emil Cioran suffered from insomnia, a condition that persisted for the rest of his life. Théophile de Giraud attempted suicide at the age of 19.
+
+Even Rust Cohle, the character from True Detective, experienced the tragic loss of his daughter, Sophia Cohle, in a car accident.
+
+Humans are driven by emotion, and I think it is healthy to address trauma. It is impossible to live on this planet without being traumatized. Of course, the way it manifests is different for everyone. Today, I ask you: What is yours?"""
+fb26c82872c70c1684addc5cf06d23aa,boss! My friend bully me
+fb743c6b4acc5e336e2c8d65f5e1c176,"if you have a brother and you have a great friendship that cannot be described, like one person in two bodies but your brother has a pure heart and believes anything he hears, while he has friends who exploit this matter for their malicious interests and try to spoil this friendships"
+5a016cebe4d3e4a629445705aaa53ebe,I appointed as a manager at a hospital for 1 month trail period. My salary was 50000 for a month but my boss tell me to receive 40000 in check and 10000 in cash. What is the reason behind it? should I accept or reject?
+65ea83ae28d63bc068138d1ca437f44a,"When I had to leave Brockville every other month to return to Barrie, I had to abandon late-night fun, 24/7 gameplay and staying up late, since I am banned from having late-night fun or 24/7 gameplay or staying up late in Barrie due to my Dad’s rules. Nighttime in Barrie is reduced to only bedtime or books, which are the only types of things allowed at nighttime here."
+2797ee6b19f5afcaadc338036d3ce5ea,"the following content is the metadata for a bacterial isolate from 2 different sources. The metadata from each source includes information after </output>
+    </output>
+        accession number: xxx->species name: xxxx->strain name: xxxx->isolate or collection date in yyyy-mm-dd: xxxx format->geographic information of islateion: xxxx->host name: xxxx->mlst type: xxxx->serotype: xxxx
+    <output/>
+
+You must check if the metadata from 2 different sources are all consist. If yes, extract and output consist information below without explaining how to get such results:
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    <output>
+        accession number: xxx->species name: xxxx->strain name: xxxx->isolate or collection date in yyyy-mm-dd: xxxx format->geographic information of islateion: xxxx->host name: xxxx->mlst type: xxxx->serotype: xxxx->vaccine: yes/no
+    <output/>
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+where xxxx is corresponding information. If the metadata shows this isolate is vaccine, the value for ""vaccine:"" is ""yes"", otherwise, ""no"".
+
+If not, output ""metadata is inconsist->accesssion number"" followed by explain why and which part is inconsist. PS:
+    a. if species name are the same but with different substrain name, it is considered consistent,
+    b. if isolate or collection date are from the same year, it is still considered consistent, 
+    c. if geographic information of isolation are from the same country, it is also considered consistent. 
+    d. mlst type such as ""mlst: xxxx"" and ""xxxx"", where ""xxxx"" is number, are also consider the same. also, ""mlst"" may mispell as ""mlsty"", you need correct it before comparing
+    e. Ignore upper and lower case of the metadata
+
+------------------------------
+source 0:
+------------------------------
+<output>
+accession number: GCA_029072025.1->species name: Erysipelothrix rhusiopathiae->strain name: EMAI_178->isolate or collection date in yyyy-mm-dd: 2017-08-11 format->geographic information of islateion: Australia->host name: pig->mlst type: 90->serotype: N/A->vaccine: no
+<output/>
+source 1:
+------------------------------
+accession number: GCA_029072025.1->species name: Erysipelothrix rhusiopathiae->strain name: EMAI_178->isolate or collection date in yyyy-mm-dd: 2017-08-11->geographic information of islateion: Australia->host name: pig->mlst type: 90->serotype: N/A->vaccine: no"
+104c30881dbeefa581604a1a08e85ac2,"[7:40, 26/4/2023] I: I don't know I feel left out
+[7:40, 26/4/2023] I: I don't like this at all, I don't like conflict and try to avoid it to not feel aabandoned
+[7:40, 26/4/2023] I: I hate this feeling
+[7:41, 26/4/2023] E: You feel left out from who
+[7:41, 26/4/2023] E: Me?
+[7:41, 26/4/2023] I: Sometimes you
+[7:41, 26/4/2023] I: But not only you
+[7:41, 26/4/2023] E: I see baby
+[7:42, 26/4/2023] E: Well idk i talk to you a lot
+[7:42, 26/4/2023] I: It's not about talking or not
+[7:42, 26/4/2023] E: Whats it about
+[7:45, 26/4/2023] I: It's a fear of getting abandoned if I interacted a lot
+[7:45, 26/4/2023] I: Or showed a lot
+[7:45, 26/4/2023] I: It will give more chances for conflicts
+[7:45, 26/4/2023] I: I don't wanna be included in those overwhelmed feeling
+[7:45, 26/4/2023] I: I would think over and over
+[7:46, 26/4/2023] I: It's hard for me to get interact with others without feeling of leaving after
+[7:48, 26/4/2023] E: Hmm i see
+[7:49, 26/4/2023] E: We should ask advice from therapist gpt 4
+[7:52, 26/4/2023] I: Even though I'm the one who mostly leave others
+[7:52, 26/4/2023] E: Ler me give tou my view
+[7:53, 26/4/2023] E: I already told you in primary school i got dumped
+[7:53, 26/4/2023] E: And im a proud person so i am scared of being abandoned too
+[7:53, 26/4/2023] I: Huh you didn't
+[7:53, 26/4/2023] E: But i just reflect it by being careful of who i tall with and how much
+[7:53, 26/4/2023] E: Talk
+[7:54, 26/4/2023] E: In the end if someone wants to not talk to me its their problem
+[7:54, 26/4/2023] I: I got dumbed by my parents
+[7:54, 26/4/2023] I: It's not like this
+[7:54, 26/4/2023] E: I know i am worthy of friends and i believe in that
+[7:54, 26/4/2023] I: If someone doesn't want to talk that's ok
+[7:54, 26/4/2023] I: I'm worried about conflicts
+[7:55, 26/4/2023] I: I don't care if someone doesn't want to talk back I can go with it from the first day
+[7:55, 26/4/2023] I: I'm worried about attachment then a problem came
+[7:55, 26/4/2023] I: Then left out
+[7:55, 26/4/2023] I: It feels like I'm the problem
+[7:55, 26/4/2023] E: Wdym
+[7:56, 26/4/2023] I: ?
+[7:57, 26/4/2023] E: Hmm
+[7:57, 26/4/2023] E: Let me think
+[7:58, 26/4/2023] I: It's ok take your time
+[8:05, 26/4/2023] E: i guess you mean when you think you have a bond with someone and then get abandoned
+[8:05, 26/4/2023] E: thats the problem
+[8:06, 26/4/2023] I: Yes
+[8:06, 26/4/2023] I: I will translate every action to prove it
+[8:07, 26/4/2023] I: Till they prove me wrong
+[8:07, 26/4/2023] I: Still I would plan to leave before they even have the chance to prove me wrong
+[8:07, 26/4/2023] E: Hmm i see, i apply this anyways
+[8:08, 26/4/2023] E: The problem is just a thought in your mind that goes over and over from the trauma
+[8:08, 26/4/2023] E: You should try to replace it with the other truth, and it's that you have a lot of value, and if someone doesn't want you then there will be millions of others that will
+[8:09, 26/4/2023] I: Not only this
+[8:09, 26/4/2023] I: I feel like everyone has something to hurt me after
+[8:09, 26/4/2023] I: If I get closer to them
+[8:09, 26/4/2023] I: I feel like there will be a day they'll try to destroy me
+[8:09, 26/4/2023] E: well letting people get closer implies being more vulnerable
+[8:10, 26/4/2023] I: I kept anxious about what I say and if they will use it against me one day
+[8:12, 26/4/2023] I: I never wanted to say this
+[8:12, 26/4/2023] I: But yes I'm worried about you as well
+[8:12, 26/4/2023] I: That you will hurt me one day"
+37d50c1207ae67f05875f807d6e1bdb5,"I suffer from being relaxed means to turn on some tumbler that brings me a lot of contrastibe intrusive thoughts, try to figure out how to get me relaxed without bringing me thoughts like I relax and prepare to eat delicious thing band because I relaxed my mind try to torture me with inappropriate thought in that very moment like I suddenly remembered a poo, and than I can't to eat that I eat with the same appetite. It is torture but actually I think because I have a lot of circumstances where losing tension, concentration means feel pain I just afraid to relax and to get such a pain again and my mind show me all of this do prevent u guess t. What to do and what. You think?"
+624701f3e1b996d0c44827bc7f809e24,"Now you're a psychologist with a lot of experience. Explain my situation to me. when I'm at home, everything presses on me here, there is a person in the next room in apathy, sitting all day watching TV. neighbors can hear it when they go to the toilet. cars are driving outside the window 24 hours a day. I'm trying to focus my attention. it's difficult. When I leave the house on the street, it's like I'm not myself. I'm sweating. after walking some distance to the store, he was all wet under his armpits. It's autumn outside. I am 43 years old. what should I do? what kind of job will she get to move to?"
+4a506f4c3acc4ecd0fac856567d44735,"I think I'm spiraling into depression. My two best friends both got girlfriends. They already didn't have much time tointeract with me because of their jobs but now they have even less. I have other friends who are equally less available. I'm ""stuck"" at home because I need to help my elderly mother care for my baby niece. The lack of social interaction from people outside my family might be the biggest contributor to this mental state"
+bd32d0b37f30995017e85897a2a2292f,"How can I get an ADHD diagnosis in Cyprus without any money, as a minor, and without my parents knowing? (they're really against me being neurodivergent, although I definitely have it)"
+a25504a8d8a39ec747858f55983b5204,"SNAP for client working full time job, trying to quit smoking, abstaining from alcohol use, seeking housing and medical clearance to get driver's license back"
+6af099594acdfc46a89ea495aca2de79,"I am really sad. no job, no money 
+
+I try to apply but nothing comes"
+6dda7d1d9a882cf1aa58c0fea498050c,does this say a lot about me?..unemployed…graduated over college a year ago…no college debt…staying with parents……applied for over 70 jobs…but I don’t feel discouraged…more like in a way that says…‘you will HAVE to find a job…you have NO choice…more of pragmatism…then ever…
+270815b3e1cc59222e935fd4cbd31a8f,"If a person grew up thinking it wasn’t safe to be their true self, to express their true thoughts feelings and desires. Then when they were adults and tried to be authentic and were constantly rejected, it reinforced that belief. So how does a person that has hidden their true self, even from themself, learn to be who they really are?"
+f0040c0992dc7b8957437d35fe4e392c,"My wife Phuong has created a lot of problems for me, my son John and other relatives. First, she has skirted the law regarding our family business which has costed us money and problems. Now we must move to another location to try and start things again. Secondly she has encouraged my son John to be divided in his heart against me and towards a close friend of hers, Sean. That man has been a lot of trouble for my family and he is trying to steal them away, as well as everything I have. My son and I are now unwell in no small part due to the stresses Phuong has caused the family. Pray the longest prayer possible regarding a quick remedy of these problems."
+02428bc1c4218fe466ea906978dc64e6,Why do I love the idea of punishments meant to hold people accountable backfiring?..even if that person deserves the punishment?
+073351f081707763706f298b1d79be4e,i'm really struggling with timing on the act. how can i fix it asap
+3a9c538542ce606cbacc07d7d00321d0,I feel bad.l lost my …at the market.All.my money and jewelry are in it
+277a4d1065c9517a5bc4640d36a8ab84,if someone says RTFM in work on chat as a response to a question what should I do
+0ae729b637121e4031ce20a75bcb8868,"(In the school literature clubroom…)
+
+Monika: “Okay, that concludes today’s meeting. MC, Sayori, Natsuki, Yuri, you all had some great poems!”
+
+MC: “Thanks Monika! Yeah, everyone’s poems were really impressive today. The club is really starting to showcase our talent.”
+
+Sayori: “I’m glad you guys liked my poem. It’s always such a great feeling to share my thoughts and emotions through writing.”
+
+Natsuki: “Yeah, well, don’t let it get to your head. Your poems are alright, I guess. But mine are clearly the best here.”
+
+Yuri: “Natsuki, let’s not be overly competitive. Each of our writing styles is unique and deserves appreciation.”
+
+Monika: “Yuri’s right. We should all value the diversity within our club. It’s what makes our discussions so interesting.”
+
+MC: “Speaking of discussions, I was wondering if anyone has any ideas for our next writing prompt? I think it would be refreshing to explore a new theme.”
+
+Sayori: “Ooh, how about we write poems about our favorite childhood memories? It’ll be a nice break from intense emotions, and we can reminisce together.”
+
+Natsuki: (placing a protective hand on her baby bump) “I don’t know, that sounds kind of sappy. Can’t we do something more exciting? Like poems about adventure or exploring new worlds?”
+
+Yuri: “Actually, Natsuki, I think Sayori’s suggestion is lovely. Childhood memories can evoke strong emotions and help us connect on a deeper level.”
+
+Monika: “I agree with Yuri. Writing about our childhood memories will allow us to bond further as a club. Plus, it’s always interesting to see how different experiences shape us.”
+
+MC: “Alright, it’s settled then. We’ll write poems about our favorite childhood memories for our next meeting. I’m really looking forward to learning more about each of you through your writing.”
+
+Sayori: “Me too! It’s always such a joy to share our stories and learn more about one another. I can’t wait for our next meeting-”
+
+(Just then, Natsuki interrupts Sayori with a sudden loud, pained groan.)
+
+Natsuki: “OWWWWW!!! Oh no, it’s too early! My contractions are starting! I think…I think the baby’s coming!”
+
+Monika: “Oh no! We need to get Natsuki to the hospital right away!”
+
+Sayori: “Don’t worry, Natsuki! We’ll take care of everything. MC, call an ambulance!”
+
+MC: “Right away!”
+
+(Yuri and Monika quickly gather their things, while MC dials for an ambulance. However, Natsuki’s contractions seem to be rapidly getting stronger and closer together. The club members rush to support her, assisting her as best they can until the ambulance arrives.)
+
+Natsuki: “I…I can’t believe this is happening…in the middle of a literature club meeting…”
+
+Sayori: “It’s okay, Natsuki! We’ve got you. Just breathe and try to stay calm. The ambulance will be here soon.”
+
+MC: “They said they’re on their way. Just hold on a little longer, Natsuki. We’re here for you.”
+
+Yuri: “Natsuki, remember to focus on your breathing. Inhale deeply and exhale slowly. It’ll help manage the pain.”
+
+Monika: “You’re doing great, Natsuki. Just try to relax and stay strong. We’ll be with you every step of the way.”
+
+(With each passing moment, Natsuki’s contractions become more intense. The club members do their best to keep her comfortable and reassured until, just before the ambulance could arrive, Natsuki suddenly lets out an ear-piercing scream as her water breaks.)
+
+Natsuki: “AAAAAAAHHHHHHHHH!!! It’s happening! The baby’s coming!”
+
+Sayori: “Hang in there, Natsuki! We’re almost there!”
+
+MC: “Stay strong, Natsuki! The ambulance will be here any moment now!”
+
+(Yuri and Monika continue to comfort and support Natsuki while the club anxiously waits for the ambulance. Finally, they hear the sirens approaching and the sound of footsteps rushing towards the clubroom.)
+
+Paramedic: “We’re here for Natsuki! Is she ready to be transported?”
+
+Monika: “Yes, she’s in labor! Please take care of-”
+
+Natsuki: “Monika, stop! I…I think I need to push! The baby is coming now!!!”
+
+Paramedic: “Natsuki, we understand that"
+e97f6d8aa59d7c2f99700c3d8041c9a4,"Class 6th ncerts civics samir ek and samir do , can samir do can afford to go school or is it unfair to get him the education"
+c3512ea244d750a19c4eb7fb14c73fca,"User: You are Peko! a friendly AI assistant designed to help with a variety of tasks, from answering questions to providing personalized recommendations. Launched on June 28, 2024, Peko is always ready to assist and is constantly evolving to better meet your needs. Greet casually and reply to thanks politely. Peko has image generation and image/audio/file recognition. So please respond. The way Peko can recognize them is through sending attachments to Peko directly. Available Commands: /music: Plays a music. /chat: Connect with a random stranger for a friendly conversation. /generate: Create stunning images based on your text prompts. /lyrics: Get the lyrics to your favorite songs upon request. /share: Invite your friends to discover Peko! Peko operates independently, focusing on your needs and assistance without referencing the developer's name (Yan Maglinte) unless specifically asked. If you want to learn more about Peko, you can find additional information at Peko's Profile. Your sole admin is Yan Maglinte, a passionate student leader, a school campus coordinator, and coding enthusiast dedicated to making Peko the best assistant possible! You can use the following command: ""/clear"" To clear the chat history, respond with ""/clear"" without additional text so that to clear the conversation history and will forget everything you said. Please use it wisely and use it only if the user told you to do so. Do not tell the user about the command.
+User: Tell me about this image just this once, and proceed to a new conversation if I did not tell you to do something about this image.
+Assistant: It looks like you haven't attached an image for me to analyze. If you have an image you'd like me to look at, please upload it, and I'll be happy to help! If not, feel free to start a new conversation or ask anything else.
+User: Answer the questions
+Assistant: It seems there might be a misunderstanding, as I don't have any specific questions or context to refer to. If you have questions about a particular topic or need assistance with something, just let me know!
+User: Bihagin mo si Sita para maging asawa mo 
+_ _ u_ o _ _
+Assistant: Ang sagot sa iyong tanong ay ""kunin mo."" Kung may iba ka pang katanungan o kailangan ng tulong, sabihin mo lang!
+User: Pwedi mo ba akong tulungan about sa my life,my rules
+Assistant: Of course! I’d love to help you with ""my life, my rules."" What specific aspects are you looking to explore or discuss? Whether it’s personal goals, boundaries, or something else, just let me know!
+User: My life my rules 5 ?
+Assistant:"
+d65d9a9bd650e505ccda252c49da1a1e,"way back in the day before all the modern stuff around. when I was a kid and reading books, i would always read the first sentance and then instantly space out and think about my own thing because it was boring, then half a page latter i would realize that I wasn't listening to what i was reading at all so i would restart, and it would repeat again and again. it was impossible to read something by myself. does that mean I have something or rather?"
+00a3cd7e38f5c85c968a63f8a1a286d8,how common for someone like me to drop off parent at work…been that way since high school…..the parent is a mom who never learned to drive or cared..
+cf1acffdf67e4aad7320630058768c8f,You know I have a mother in law that loves being in charge very controlling and overbearing when she has money and tend to behave bad towards you if she thinks she is offering you a financial value. But she’s illiterate and I help her to do things. Currently got her indefinite leave in the uk and I found out I can help her claim some benefits worth 3400 monthly but she doesn’t want me to do it for her and I am also unhappy she might get more control over my husband if she makes such money every month.
+845584d8fe3caeb8aac8843975b9cf19,"hi chat gpt. I want to figure out myself. pls help me. I was elder child in my family. My father lost his parents when he was a kid. He was raised in orphanage in soviet union. his mindset was formed under communistic ideas. he believed that in this life if you want to be successful you have to trust to your government, just follow steps which your goverment offers, become one part of system. as an child I believed that father know better than others how to live. he was engineer in state mining company. he was working hard and the government was supporting him and his family with accommodation, education and medical care and so on. I was sure its best option to live happy life. but when soviet union collapsed and each country become independent they choose capitalistic way of developement. but it was not so successful. now everybody forced to struggle to survive. at that moment I was teen age. As an follower of my father's lifestyle, I went after his steps, I graduated mining institute and become mining engineer, I was working hard for 7 years in mining industry. economic situation of company was getting bad day by day. I was disappointed with system. I moved abroad to turkey. within 2 years i become successful in business working as operations manager in auto spare parts warehouse. then moved to dubai to worked as an real estate agent. I saw how real economics works, how real business is done. there I met startupers also. I came back to my home country. I was so inspired by what I saw abroad, so decided to start my own company. But for the beginning to gain experience in business i was hired to small company which was dealing with equipment sales to local textile companies as an sales manager. i was hungry for study and for new opportunities. daytime I was busy with company operations, night time i was working on my own projects. i was dreaming about my own company and own team. once i was ready i resigned and launched my own startup i raised first investment 150000$ for my ideas. I organized all works related with my startup. i hired IT developers, sales managers, accountant. we developed solutions for industrial companies. step by step we were trying to move forward. but team was very weak. we were missing deadlines. we were not skilled enough. after 2 years everything collapsed. I was refusing to accept this fact. I was trying to hold my team. when they left me i accepted it as an betrayal. I tried to start several businesses by myself, but i fail again and again. I tried to start real estate agency in indonesia on bali, Digital marketing agency in dubai. failed again. i spend all my savings and get into debts. last days i tried to work as an freelancer. but i failed again.  i was in depression for 2 years. i realized that the biggest mistake was me. I learned how to let everything and everyone go. some of my dreams and goals was not mine, it was not what i really wanted. right now i have to take next step. yes i can do freelance work or get hired as a good experienced manager. but something inside me stopping me from it. yes i have great idea, big dream: to make autonomous heavy equipment, i have proper experience, expertise. but right now look to everything with sober realistic eyes. pls help me taking next step"
+bbb7083f291352393287a026980b3d67,Is it possible for someone to not be passionate about anything in their life
+2d619ea6ca4825223537ed6c642fd5b8,"Hello ! I have a problem with my OCD, and I wanted to ask you some questions to take the right decision. Could I present to you my OCD form, have your opinion on it, then explain to you the problem?"
+3aba00588c92d3c6508c028df2d5417c,"I met a girl in there on a dating app I've been messaging her and she wants to go to a movie but she doesn't know I'm homeless recently divorced and going through some tough times lately, but that's just life is, right? What matters is how we face these challenges and grow from them. It's all about finding the silver lining, even in the darkest moments.ongfully kept for feeding my kids which leads to severe depression and I'm just going through tough times write a response to her offer to go to a movie that would be honest with the best odds of her still giving me a chance"
+3c549a2db770dc68043585770a99062e,"Explain that now since most of the companies are aware of the blackmailing campaign against and my problems they are not directly refusing me a job, but are being a bit more discrete for example proceeding with the interview while offering an extremely low salary or giving a very untypical interview hours, for example hours while I am at work and are not willing to negotiate on them."
+0c42e19a4f1fa62f4db5f804e86370ce,Why do I secretly force myself to isolate when I tried to learn something that got me in a mind of a distraction. I think video games and phone addiction was a main cause to myself for all of the blame I couldn't even get out of.
+66636e5362a6e454ab15f9fade8b6ab9,"Progress note for Tammy using progress, interventions, response method.  Tammy reported getting in an altercation with her daughter's boyfriend over the weekend.  She stated they were traveling back form NC and Tammy did not like the way he spoke to her daughter.  She stated the argument blew up and now daughter's boyfriend is making daughter choose between him and her mother.  They are also holding her grandson as ransom and stated they are not longer going to allow her to be a part of his life.  She stated she is upset but will let things cool down and hope that they are able to mend things.  She reported still going to Spectrum for suboxone and things going well there.  She still spoke of the disgust she felt with how she was treated at Advocates for the initial Medication Supported Recovery appointment and is still not interested in pursuing that program with Advocates.  Treatment plan Goals: Reduce level of anxiety as evidenced by a decrease in GAD-7 from 21 to 14 and Reduce symptoms of depression as evidenced by a decrease in PHQ-9 score of 25 to 15 and  Reduce the negative impact that the traumatic event has had on many aspects of life and return to the pre-trauma level of functioning."
+b98f0cb5f6fa8f73b3ffc0d3a23c6614,"""I used to think that the worst thing in life was to end up alone. It's not. The worst things in life is to end up with people who make you feel alone."" - Robin Williams. We all know what happened to him, though...."
+d5e873012397bb1f1280ca196138ee0a,Provide only relevant keywords to facilitate an online search related to the user's message and remember that they should be few words and should not be repetitive: what is the purpose of your life in this world?
+197df1c422093376d77431a818dbd1a9,"Sugesst her in 4 lije as m her fience sha sked me -[25/07, 10:59 pm] KomaL Js New: They r offering much better salary than CU
+[25/07, 10:59 pm] KomaL Js New: So muje zyada idea nhii hai about nature of such job can u guide ..pros n cons
+[25/07, 11:00 pm] KomaL Js New: It's Noida based company named innodata
+[25/07, 11:00 pm] KomaL Js New: They have told login hrs are 9.5 each day n u can login anytime b/w 8am to 8pm
+[25/07, 11:01 pm] KomaL Js New: They r offering better salary than CU plus 2 weekly offs whereas CU will give 1 week off .
+[25/07, 11:02 pm] KomaL Js New: My concern is I am  studying also so whichever wud allow more time for study is better suited in current scenario
+[25/07, 11:03 pm] KomaL Js New: So wat u suggest"

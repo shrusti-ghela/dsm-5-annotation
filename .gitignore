@@ -1,0 +1,18 @@
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# Local annotation data
+data/annotations_v3.csv
+data/acknowledgements.jsonl
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Environment files
+.env
+.venv/
+venv/
