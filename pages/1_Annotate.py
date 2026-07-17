@@ -850,12 +850,11 @@ if mode == "Annotation":
 
         if is_formal_annotator:
             st.caption(
-                "The pilot is an unpaid testing batch. Compensation applies "
-                "only to formally assigned annotation batches."
+                "The pilot is a testing batch."
             )
         else:
             st.caption(
-                "You currently have access only to the unpaid pilot testing batch."
+                "You currently have access only to the pilot testing batch."
             )
 
         st.divider()
@@ -993,7 +992,7 @@ current = pool[
 safe_msg = html.escape(str(current["first_user_message"]))
 
 if current["study_phase"] == "pilot":
-    phase_label = "Pilot testing batch — unpaid"
+    phase_label = "Pilot testing batch"
 elif bool(current.get("is_reassigned", False)):
     phase_label = str(
         current.get("reassignment_batch_label", "Reassigned batch")
