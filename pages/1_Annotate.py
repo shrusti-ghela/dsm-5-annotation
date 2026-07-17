@@ -1,5 +1,7 @@
 import html
 import json
+import re
+
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
@@ -135,13 +137,28 @@ ADMIN_PASSWORD = st.secrets.get("ADMIN_PASSWORD", "admin123")
 # -----------------------------------------------------------------------------
 # STUDY / PARTICIPANT-BATCH CONFIGURATION
 # -----------------------------------------------------------------------------
-ANNOTATOR_IDS = [
-    "u6045151",
-    "u1655162",
-    "1",
-    "2",
+# Only these selected annotators receive formal main-study batches.
+# Replace the placeholder entries with the final selected annotator uNIDs.
+FORMAL_ANNOTATOR_IDS = [
+    "u1509787",
+    "u1276376",
+    "u1588664",  
+    "u1589107",  
 ]
-ALLOWED_EXPERT_IDS = set(ANNOTATOR_IDS)
+FORMAL_ANNOTATOR_ID_SET = set(FORMAL_ANNOTATOR_IDS)
+
+# Anyone with a correctly formatted University of Utah uNID can access the pilot.
+UNID_PATTERN = re.compile(r"^u\d{7}$", re.IGNORECASE)
+
+
+def normalize_unid(value: str) -> str | None:
+    """Return a normalized uNID, or None when the value is invalid."""
+    unid = str(value).strip().lower()
+
+    if not UNID_PATTERN.fullmatch(unid):
+        return None
+
+    return unid
 
 PILOT_SIZE = 8
 MAIN_STUDY_SIZE = 100
@@ -159,7 +176,7 @@ assert sum(PARTICIPANT_BATCH_SIZES) == 50
 #   {1}               -> pilot + personal batch 1
 #   {1, 2, 3}         -> pilot + personal batches 1-3
 #   set(range(1, 8))  -> pilot + all seven personal batches
-RELEASED_PARTICIPANT_BATCHES = {1}
+RELEASED_PARTICIPANT_BATCHES = set()
 
 # Optional reassignment rules. Leave this empty during the pilot unless needed.
 # Each rule transfers only unfinished prompts from one participant batch.
@@ -191,7 +208,13 @@ REASSIGNMENT_RULES = []
 
 def build_balanced_main_pairs():
     """Return 100 annotator pairs with exactly 50 assignments per annotator."""
-    a, b, c, d = ANNOTATOR_IDS
+    if len(FORMAL_ANNOTATOR_IDS) != 4:
+        raise ValueError(
+            "Exactly four formal annotator uNIDs are required before main-study "
+            "assignments can be generated. Update FORMAL_ANNOTATOR_IDS."
+        )
+
+    a, b, c, d = FORMAL_ANNOTATOR_IDS
 
     all_six_pairs = [
         (a, b),
@@ -212,7 +235,7 @@ def build_balanced_main_pairs():
     pairs = all_six_pairs * 16 + final_four_pairs
     assert len(pairs) == MAIN_STUDY_SIZE
 
-    counts = {annotator: 0 for annotator in ANNOTATOR_IDS}
+    counts = {annotator: 0 for annotator in FORMAL_ANNOTATOR_IDS}
     for pair in pairs:
         for annotator in pair:
             counts[annotator] += 1
@@ -248,7 +271,7 @@ def assign_personal_batches(main_df, main_pairs):
 
     assignments = []
 
-    for annotator_id in ANNOTATOR_IDS:
+    for annotator_id in FORMAL_ANNOTATOR_IDS:
         assigned_indices = [
             main_idx
             for main_idx, pair in enumerate(main_pairs)
@@ -320,8 +343,11 @@ def prepare_study(messages_df):
     Expected row order:
       rows 0-7   = pilot
       rows 8-107 = main study
+
+    Pilot assignments are added dynamically after a participant logs in.
     """
     expected = PILOT_SIZE + MAIN_STUDY_SIZE
+
     if len(messages_df) < expected:
         st.error(
             f"Expected at least {expected} unique messages "
@@ -332,37 +358,74 @@ def prepare_study(messages_df):
 
     study_messages = messages_df.iloc[:expected].copy().reset_index(drop=True)
     study_messages["study_phase"] = "main"
-
-    for idx in range(PILOT_SIZE):
-        study_messages.at[idx, "study_phase"] = "pilot"
-
-    assignment_rows = []
-
-    # Every annotator receives every pilot prompt.
-    for idx in range(PILOT_SIZE):
-        message_id = str(study_messages.iloc[idx]["message_id"])
-        for annotator_id in ANNOTATOR_IDS:
-            assignment_rows.append(
-                {
-                    "message_id": message_id,
-                    "annotator_id": str(annotator_id),
-                    "study_phase": "pilot",
-                    "participant_batch_id": 0,
-                    "is_released": True,
-                    "original_annotator_id": str(annotator_id),
-                    "is_reassigned": False,
-                    "reassignment_id": "",
-                    "reassignment_batch_label": "",
-                }
-            )
+    study_messages.loc[: PILOT_SIZE - 1, "study_phase"] = "pilot"
 
     main_df = study_messages.iloc[PILOT_SIZE:].copy().reset_index(drop=True)
-    assignment_rows.extend(
-        assign_personal_batches(main_df, MAIN_ASSIGNMENT_PAIRS)
+
+    assignment_rows = assign_personal_batches(
+        main_df,
+        MAIN_ASSIGNMENT_PAIRS,
     )
 
     return study_messages, assignment_rows
 
+
+def add_pilot_assignments(
+    assignments_df: pd.DataFrame,
+    messages_df: pd.DataFrame,
+    annotator_id: str,
+) -> pd.DataFrame:
+    """
+    Give every valid uNID access to all pilot messages.
+
+    Formal main-study assignments remain limited to FORMAL_ANNOTATOR_IDS.
+    """
+    updated = assignments_df.copy()
+
+    pilot_messages = messages_df[
+        messages_df["study_phase"] == "pilot"
+    ].copy()
+
+    existing_pairs = set()
+
+    if not updated.empty:
+        existing_pairs = set(
+            zip(
+                updated["message_id"].astype(str),
+                updated["annotator_id"].astype(str),
+            )
+        )
+
+    new_rows = []
+
+    for _, pilot_message in pilot_messages.iterrows():
+        message_id = str(pilot_message["message_id"])
+        pair = (message_id, str(annotator_id))
+
+        if pair in existing_pairs:
+            continue
+
+        new_rows.append(
+            {
+                "message_id": message_id,
+                "annotator_id": str(annotator_id),
+                "study_phase": "pilot",
+                "participant_batch_id": 0,
+                "is_released": True,
+                "original_annotator_id": str(annotator_id),
+                "is_reassigned": False,
+                "reassignment_id": "",
+                "reassignment_batch_label": "",
+            }
+        )
+
+    if new_rows:
+        updated = pd.concat(
+            [updated, pd.DataFrame(new_rows)],
+            ignore_index=True,
+        )
+
+    return updated
 
 def apply_reassignments(assignments_df, annotations_df):
     """Transfer only unfinished assignments while preventing duplicate annotation.
@@ -393,7 +456,7 @@ def apply_reassignments(assignments_df, annotations_df):
 
         if not reassignment_id:
             raise ValueError("Every reassignment rule needs a reassignment_id.")
-        if from_annotator not in ALLOWED_EXPERT_IDS:
+        if from_annotator not in FORMAL_ANNOTATOR_ID_SET:
             raise ValueError(f"Unknown original annotator: {from_annotator}")
         if participant_batch_id not in range(1, TOTAL_PARTICIPANT_BATCHES + 1):
             raise ValueError(
@@ -404,7 +467,7 @@ def apply_reassignments(assignments_df, annotations_df):
             raise ValueError(
                 f"Reassignment {reassignment_id} needs at least one replacement candidate."
             )
-        if any(candidate not in ALLOWED_EXPERT_IDS for candidate in candidates):
+        if any(candidate not in FORMAL_ANNOTATOR_ID_SET for candidate in candidates):
             raise ValueError(
                 f"Reassignment {reassignment_id} contains an unknown replacement annotator."
             )
@@ -565,54 +628,81 @@ with st.sidebar:
     
 
     if mode == "Annotation":
-        st.header("Annotator")
+        st.header("Participant")
 
-        acknowledged_ids = load_acknowledgements()
+        acknowledged_ids = {
+            str(value).strip().lower()
+            for value in load_acknowledgements()
+        }
 
-        saved_annotator = st.session_state.get("verified_annotator", "").strip()
+        saved_annotator = normalize_unid(
+            st.session_state.get("verified_annotator", "")
+        )
 
         if saved_annotator:
             annotator_id = saved_annotator
 
-            if annotator_id not in ALLOWED_EXPERT_IDS:
-                st.error("Invalid Expert ID. Please enter it again.")
-                st.session_state.pop("verified_annotator", None)
-                st.session_state.pop("instructions_acknowledged", None)
-                st.stop()
-
             if annotator_id not in acknowledged_ids:
                 st.warning(
-                    "Please read and acknowledge the instructions before annotating."
+                    "Please read and acknowledge the study information "
+                    "and instructions before annotating."
                 )
-                st.page_link("app.py", label="Go to Instructions", icon="📘")
+                st.page_link(
+                    "app.py",
+                    label="Go to Instructions",
+                    icon="📘",
+                )
                 st.stop()
 
-            st.success(f"Expert ID: {annotator_id}")
+            st.session_state["verified_annotator"] = annotator_id
+            st.success(f"uNID: {annotator_id}")
+
+            if annotator_id in FORMAL_ANNOTATOR_ID_SET:
+                st.caption(
+                    "You have access to the pilot and your currently released "
+                    "formal annotation batches."
+                )
+            else:
+                st.caption(
+                    "You currently have access to the pilot testing batch."
+                )
 
         else:
             st.warning(
-                "Enter your Expert ID to continue. All annotators must read the instructions first."
+                "Enter your University of Utah uNID to continue. "
+                "You must acknowledge the instructions first."
             )
 
-            returning_id = st.text_input(
-                "Expert ID / UNID",
+            returning_id_input = st.text_input(
+                "University of Utah uNID",
                 placeholder="e.g. u1234567",
-            ).strip()
+                max_chars=8,
+            )
+
+            returning_id = normalize_unid(returning_id_input)
 
             left, center, right = st.columns([1, 2, 1])
+
             with center:
-                if st.button("📘 Instructions", use_container_width=True):
+                if st.button(
+                    "📘 Instructions",
+                    use_container_width=True,
+                ):
                     st.switch_page("app.py")
 
-            if returning_id:
-                if returning_id not in ALLOWED_EXPERT_IDS:
-                    st.error("Invalid Expert ID. Please check your assigned Expert ID.")
-                    st.stop()
+            if returning_id_input and returning_id is None:
+                st.error(
+                    "Enter a valid uNID in the format u followed by "
+                    "7 digits, such as u1234567."
+                )
+                st.stop()
 
+            if returning_id:
                 if returning_id not in acknowledged_ids:
                     st.error(
-                        "This Expert ID has not acknowledged the instructions yet. "
-                        "Please read the instructions first."
+                        "This uNID has not acknowledged the study information "
+                        "and instructions yet. Please complete the instructions "
+                        "page first."
                     )
                     st.stop()
 
@@ -630,6 +720,12 @@ with st.sidebar:
 
 
 if mode == "Annotation":
+    assignments = add_pilot_assignments(
+        assignments_df=assignments,
+        messages_df=messages,
+        annotator_id=str(annotator_id),
+    )
+
     user_assignments = assignments[
         assignments["annotator_id"] == str(annotator_id)
     ].copy()
@@ -705,14 +801,37 @@ if mode == "Annotation":
         if reassigned_ids and reassigned_ids.issubset(annotated_by_user):
             completed_reassigned_batches += 1
 
-    pilot_batch_completed = pilot_completed == PILOT_SIZE
-    released_reimbursable_batches = (
-        1 + len(RELEASED_PARTICIPANT_BATCHES) + len(reassignment_ids)
+    pilot_batch_completed = (
+        bool(pilot_ids)
+        and pilot_ids.issubset(annotated_by_user)
     )
-    total_reimbursable_batches = (
-        1 + TOTAL_PARTICIPANT_BATCHES + len(reassignment_ids)
+
+    is_formal_annotator = (
+        str(annotator_id) in FORMAL_ANNOTATOR_ID_SET
     )
-    completed_reimbursable_batches = (
+
+    released_formal_batches = (
+        len(RELEASED_PARTICIPANT_BATCHES)
+        if is_formal_annotator
+        else 0
+    )
+    total_formal_batches = (
+        TOTAL_PARTICIPANT_BATCHES
+        if is_formal_annotator
+        else 0
+    )
+
+    released_batch_count = (
+        1
+        + released_formal_batches
+        + len(reassignment_ids)
+    )
+    total_batch_count = (
+        1
+        + total_formal_batches
+        + len(reassignment_ids)
+    )
+    completed_batch_count = (
         int(pilot_batch_completed)
         + completed_main_batches
         + completed_reassigned_batches
@@ -721,14 +840,23 @@ if mode == "Annotation":
     with st.sidebar:
         st.metric(
             "Batches available",
-            f"{released_reimbursable_batches}/{total_reimbursable_batches}",
+            f"{released_batch_count}/{total_batch_count}",
         )
         st.metric(
             "Batches completed",
-            f"{completed_reimbursable_batches}/{released_reimbursable_batches}",
+            f"{completed_batch_count}/{released_batch_count}",
         )
         st.metric("Prompts remaining", remaining_count)
-        st.caption("The pilot counts as one reimbursable batch.")
+
+        if is_formal_annotator:
+            st.caption(
+                "The pilot is an unpaid testing batch. Compensation applies "
+                "only to formally assigned annotation batches."
+            )
+        else:
+            st.caption(
+                "You currently have access only to the unpaid pilot testing batch."
+            )
 
         st.divider()
         st.header("Support Resources")
@@ -776,9 +904,26 @@ else:
         st.metric("Total samples", len(messages))
         st.metric("Total annotations", len(annotations))
 
+    saved_annotation_ids = []
+
+    if not annotations.empty and "annotator_id" in annotations.columns:
+        saved_annotation_ids = (
+            annotations["annotator_id"]
+            .dropna()
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            .unique()
+            .tolist()
+        )
+
+    review_annotator_ids = sorted(
+        set(FORMAL_ANNOTATOR_IDS) | set(saved_annotation_ids)
+    )
+
     review_annotator = st.sidebar.selectbox(
         "Review annotator",
-        ["All annotators"] + ANNOTATOR_IDS,
+        ["All annotators"] + review_annotator_ids,
     )
 
     if review_annotator == "All annotators":
@@ -848,7 +993,7 @@ current = pool[
 safe_msg = html.escape(str(current["first_user_message"]))
 
 if current["study_phase"] == "pilot":
-    phase_label = "Pilot"
+    phase_label = "Pilot testing batch — unpaid"
 elif bool(current.get("is_reassigned", False)):
     phase_label = str(
         current.get("reassignment_batch_label", "Reassigned batch")
@@ -1000,6 +1145,14 @@ else:
                 "annotator_id": str(annotator_id),
                 "study_phase": str(current.get("study_phase", "")),
                 "batch_id": int(current.get("participant_batch_id", 0)),
+                "participation_type": (
+                    "pilot_tester"
+                    if str(current.get("study_phase", "")) == "pilot"
+                    else "formal_annotator"
+                ),
+                "is_compensated_batch": (
+                    str(current.get("study_phase", "")) != "pilot"
+                ),
                 "original_annotator_id": str(
                     current.get("original_annotator_id", annotator_id)
                 ),

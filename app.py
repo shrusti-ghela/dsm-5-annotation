@@ -1,5 +1,6 @@
 import base64
 import html
+import re
 from pathlib import Path
 
 import streamlit as st
@@ -27,37 +28,49 @@ messages = load_messages()
 annotations = load_annotations()
 taxonomy = load_taxonomy()
 
-ALLOWED_EXPERT_IDS = {
-    "u6045151",
-    "u1655162",
-    "1",
-    "2",
-    "3",
-}
+# ALLOWED_EXPERT_IDS = {
+#     "u6045151",
+#     "u1655162",
+#     "1",
+#     "2",
+#     "3",
+# }
+UNID_PATTERN = re.compile(r"^u\d{7}$", re.IGNORECASE)
 
 
 # Replace the PDF at this location with the final IRB-stamped document.
 # Keep the same filename, or update this path if you rename the file.
 CONSENT_PDF_PATH = Path("assets/consent_letter.pdf")
 
+def normalize_unid(value: str) -> str | None:
+    """
+    Normalize and validate a University of Utah uNID.
+
+    A valid uNID consists of the letter 'u' followed by exactly seven digits.
+    """
+    unid = value.strip().lower()
+
+    if not UNID_PATTERN.fullmatch(unid):
+        return None
+
+    return unid
 
 def mark_instructions_complete():
-    expert_id = st.session_state.get("home_expert_id", "").strip()
+    entered_id = st.session_state.get("home_expert_id", "")
+    expert_id = normalize_unid(entered_id)
 
-    if not expert_id:
-        st.session_state["instructions_error"] = "Please enter your Expert ID / UNID."
-        return
-
-    if expert_id not in ALLOWED_EXPERT_IDS:
+    if expert_id is None:
         st.session_state["instructions_error"] = (
-            "Invalid Expert ID. Please check your assigned Expert ID and try again."
+            "Please enter a valid University of Utah uNID in the format "
+            "u followed by 7 digits, such as u1234567."
         )
         return
 
     if not st.session_state.get("study_acknowledgement_checkbox", False):
         st.session_state["instructions_error"] = (
-        "Please review the study information, consent document, category definitions, "
-        "and instructions, then check the acknowledgement box before continuing."
+            "Please review the study information, consent document, category "
+            "definitions, and instructions, then check the acknowledgement box "
+            "before continuing."
         )
         return
 
@@ -68,9 +81,12 @@ def mark_instructions_complete():
             {
                 "annotator_id": expert_id,
                 "timestamp": utc_now_iso(),
+                "acknowledgement_type": "study_consent",
             }
         )
 
+    # Store the normalized uNID everywhere.
+    st.session_state["home_expert_id"] = expert_id
     st.session_state["verified_annotator"] = expert_id
     st.session_state["instructions_acknowledged"] = True
     st.session_state["instructions_read_by"] = expert_id
@@ -321,13 +337,27 @@ st.warning(
     """
 )
 
+st.info(
+    """
+    **Pilot testing access**
+
+    The pilot annotation batch is available to anyone with a valid University
+    of Utah uNID.
+
+    Access to later formal annotation batches will be limited to selected
+    annotators.
+    """
+)
+
 with st.container(border=True):
     #st.subheader("Acknowledge Instructions")
 
     st.text_input(
-        "Expert ID / UNID",
-        placeholder="e.g. u1234567",
-        key="home_expert_id",
+    "University of Utah uNID",
+    placeholder="e.g. u1234567",
+    key="home_expert_id",
+    max_chars=8,
+    help="Enter the letter u followed by your 7-digit University ID.",
     )
 
     st.checkbox(
@@ -357,7 +387,8 @@ with st.container(border=True):
 
 if not st.session_state.get("verified_annotator"):
     st.warning(
-        "Please enter your Expert ID / UNID, review the consent document and category definitions, and save the acknowledgement before annotating."
+        "Please enter your University of Utah uNID, review the consent document "
+        "and category definitions, and save the acknowledgement before continuing."
     )
 else:
     st.markdown(
