@@ -196,9 +196,9 @@ Our goal is to understand **what kinds of help-seeking questions people bring to
 You will review the **first message** that a user sent in a conversation with an LLM and identify the
 context of the user's request.
 
-The primary annotation scheme consists of **eight contextual categories** adapted from the DSM-5 section **"Other Conditions That May Be a Focus of Clinical Attention."** These categories describe psychosocial, environmental, relational, occupational, legal, health-service, and other contextual conditions that may be relevant to a person's situation. **They are not mental disorder diagnoses.**
+The primary annotation scheme consists of **nine contextual categories** adapted from the DSM-5 section **"Other Conditions That May Be a Focus of Clinical Attention."** These categories describe psychosocial, environmental, relational, occupational, legal, health-service, and other contextual conditions that may be relevant to a person's situation. **They are not mental disorder diagnoses.**
 
-In addition to these eight contextual categories, the annotation scheme also includes **General Life Help-Seeking** and **Out of Scope**.
+In addition to these nine contextual categories, the annotation scheme also includes **General Life Help-Seeking** and **Out of Scope**.
 """
     )
 
