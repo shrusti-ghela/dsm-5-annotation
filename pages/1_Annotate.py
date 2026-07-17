@@ -848,14 +848,14 @@ if mode == "Annotation":
         )
         st.metric("Prompts remaining", remaining_count)
 
-        if is_formal_annotator:
-            st.caption(
-                "The pilot is a testing batch."
-            )
-        else:
-            st.caption(
-                "You currently have access only to the pilot testing batch."
-            )
+        # if is_formal_annotator:
+        #     st.caption(
+        #         "The pilot is a testing batch."
+        #     )
+        # else:
+        #     st.caption(
+        #         "You currently have access only to the pilot testing batch."
+        #     )
 
         st.divider()
         st.header("Support Resources")
