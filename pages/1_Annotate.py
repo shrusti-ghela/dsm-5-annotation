@@ -21,6 +21,154 @@ from utils.io import (
 st.set_page_config(page_title="Annotate", page_icon="📝", layout="wide")
 apply_styles()
 
+st.markdown(
+    """
+    <style>
+    /* Main user-message card */
+    .annotation-user-message {
+        background: linear-gradient(135deg, #FFF4E8 0%, #FFE4C2 100%);
+        border: 1px solid #F3A34A;
+        border-left: 8px solid #E97816;
+        border-radius: 14px;
+        padding: 1.35rem 1.5rem;
+        margin: 0.65rem 0 1.8rem 0;
+        box-shadow: 0 8px 22px rgba(190, 104, 25, 0.12);
+    }
+
+    .annotation-user-message-label {
+        color: #A84B00;
+        font-size: 0.82rem;
+        font-weight: 750;
+        letter-spacing: 0.04em;
+        margin-bottom: 0.55rem;
+        text-transform: uppercase;
+    }
+
+    .annotation-user-message-text {
+        color: #17212B;
+        font-size: 1.08rem;
+        line-height: 1.65;
+        margin: 0;
+        overflow-wrap: anywhere;
+    }
+
+    /* Category headings should remain smaller than section headings */
+    .annotation-category-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        min-height: 2.3rem;
+        margin-top: 1rem;
+        margin-bottom: 0.15rem;
+        padding: 0.45rem 0.65rem;
+        border-left: 5px solid var(--category-color);
+        border-radius: 5px;
+        background: rgba(127, 127, 127, 0.06);
+    }
+
+    .annotation-category-dot {
+        width: 0.72rem;
+        height: 0.72rem;
+        border-radius: 50%;
+        background: var(--category-color);
+        flex-shrink: 0;
+    }
+
+    .annotation-category-label {
+        color: inherit;
+        font-size: 0.98rem;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+
+    [data-testid="stMainBlockContainer"] h2 {
+        font-size: 1.35rem;
+        margin-top: 1.2rem;
+        margin-bottom: 0.3rem;
+    }
+
+    [data-testid="stCaptionContainer"] {
+        font-size: 0.86rem;
+    }
+
+    [data-testid="stExpander"] summary {
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    [data-testid="stCheckbox"] label p {
+        font-size: 0.92rem;
+    }
+
+    [data-testid="stExpander"] {
+        margin-bottom: 0.45rem;
+    }
+
+    /* Notes section */
+    .annotation-notes-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-top: 1.7rem;
+        margin-bottom: 0.45rem;
+        padding: 0.75rem 0.9rem;
+        border-radius: 10px;
+        background: #FFF8E7;
+        border: 1px solid #E7B85C;
+        border-left: 6px solid #D98B00;
+        font-weight: 750;
+        font-size: 1rem;
+        color: #6B4300;
+    }
+
+    .annotation-notes-help {
+        margin: -0.1rem 0 0.55rem 0;
+        color: #5D6470;
+        font-size: 0.88rem;
+    }
+
+    [data-testid="stTextArea"] {
+        padding: 0.85rem 0.9rem 0.95rem 0.9rem;
+        border-radius: 12px;
+        background: #FFFDF8;
+        border: 1px solid #E8C985;
+        box-shadow: 0 4px 14px rgba(105, 79, 23, 0.07);
+        margin-bottom: 1rem;
+    }
+
+    [data-testid="stTextArea"] textarea {
+        min-height: 130px;
+        border: 1.5px solid #D9A441 !important;
+        border-radius: 9px !important;
+        background: #FFFFFF !important;
+        font-size: 0.95rem !important;
+        line-height: 1.55 !important;
+    }
+
+    [data-testid="stTextArea"] textarea:focus {
+        border-color: #C87800 !important;
+        box-shadow: 0 0 0 3px rgba(216, 139, 0, 0.14) !important;
+    }
+
+    [data-testid="stTextArea"] label p {
+        font-weight: 700;
+        color: #4C3A16;
+    }
+
+    /* Slightly soften the full page and improve section rhythm */
+    [data-testid="stMainBlockContainer"] {
+        padding-top: 1.4rem;
+        padding-bottom: 3rem;
+    }
+
+    div[data-testid="stVerticalBlock"] > div:has(.annotation-category-heading) {
+        scroll-margin-top: 1rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 hero(
     "Annotate",
     "Identify the contextual conditions reflected in each help-seeking request.",
@@ -90,6 +238,23 @@ annotations = load_annotations()
 taxonomy = load_taxonomy()
 label_lookup = {x["id"]: x["label"] for x in taxonomy}
 
+# Color-blind-friendly category accents based on the Okabe-Ito palette.
+# Color is used as a secondary visual cue; category names remain visible.
+CATEGORY_COLORS = {
+    "RELATIONAL_PROBLEMS": "#0072B2",
+    "EDUCATIONAL_OCCUPATIONAL_PROBLEMS": "#E69F00",
+    "HOUSING_ECONOMIC_PROBLEMS": "#009E73",
+    "SOCIAL_ENVIRONMENT_PROBLEMS": "#CC79A7",
+    "LEGAL_CRIME_PROBLEMS": "#D55E00",
+    "HEALTH_SERVICE_ENCOUNTERS": "#56B4E9",
+    "OTHER_PSYCHOSOCIAL_ENVIRONMENTAL_PROBLEMS": "#F0B000",
+    "PERSONAL_HISTORY": "#6A51A3",
+    "ABUSE_NEGLECT": "#B2182B",
+    "GENERAL_LIFE_HELP_SEEKING": "#4D4D4D",
+    "OUT_OF_SCOPE": "#767676",
+}
+DEFAULT_CATEGORY_COLOR = "#5F6B76"
+
 
 def format_definition(text):
     lines = str(text).splitlines()
@@ -129,7 +294,7 @@ def format_definition(text):
             )
 
     return (
-        '<div style="max-height:520px; overflow-y:auto; padding-right:0.6rem; font-size:0.95rem;">'
+        '<div style="max-height:520px; overflow-y:auto; padding-right:0.6rem; font-size:0.9rem;">'
         + "".join(html_parts)
         + "</div>"
     )
@@ -1091,7 +1256,15 @@ else:
     )
 
 st.caption(phase_label)
-card(f"<h3>User Message</h3><p>{safe_msg}</p>", "user-card")
+st.markdown(
+    f"""
+    <section class="annotation-user-message" aria-label="User message">
+        <div class="annotation-user-message-label">User message</div>
+        <p class="annotation-user-message-text">{safe_msg}</p>
+    </section>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 if mode == "Review":
@@ -1190,18 +1363,44 @@ else:
     category_decisions = {}
 
     for item in taxonomy:
-        st.markdown(f"### **{item['label']}**")
+        category_id = str(item["id"])
+        category_label = html.escape(str(item["label"]))
+        category_color = CATEGORY_COLORS.get(
+            category_id,
+            DEFAULT_CATEGORY_COLOR,
+        )
+
+        st.markdown(
+            f"""
+            <div
+                class="annotation-category-heading"
+                style="--category-color: {category_color};"
+            >
+                <span
+                    class="annotation-category-dot"
+                    aria-hidden="true"
+                ></span>
+                <span class="annotation-category-label">
+                    {category_label}
+                </span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
         decision = get_yes_maybe_decision(
             annotator_id=str(annotator_id),
             message_id=current_message_id,
-            category_id=item["id"],
-            saved_decision=saved_decisions.get(item["id"], "No"),
+            category_id=category_id,
+            saved_decision=saved_decisions.get(category_id, "No"),
         )
 
-        category_decisions[item["id"]] = decision
+        category_decisions[category_id] = decision
 
-        with st.expander("Definition", expanded=False):
+        with st.expander(
+            f"View definition for {item['label']}",
+            expanded=False,
+        ):
             st.markdown(
                 format_definition(item["definition"]),
                 unsafe_allow_html=True,
@@ -1212,10 +1411,25 @@ else:
     if notes_key not in st.session_state:
         st.session_state[notes_key] = saved_notes
 
+    st.markdown(
+        """
+        <div class="annotation-notes-heading">
+            <span aria-hidden="true">✍️</span>
+            <span>Notes / rationale</span>
+        </div>
+        <div class="annotation-notes-help">
+            Optional: briefly explain uncertain, overlapping, or difficult category choices.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
     notes = st.text_area(
         "Notes / rationale",
-        placeholder="Optional note about why you selected these labels",
+        placeholder="Add an optional note about your reasoning...",
         key=notes_key,
+        height=140,
+        label_visibility="collapsed",
     )
 
     is_last_prompt = current_idx == len(pool_ids) - 1

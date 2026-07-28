@@ -221,7 +221,7 @@ but for this task you should rely on the provided definitions and examples.
                     unsafe_allow_html=True,
                 )
 
-    with st.expander("Annotation Instructions", expanded=True):
+    with st.expander("Annotation Instructions", expanded=False):
 #         st.markdown(
 #             """
 # 1. Open the **Annotate** page from the sidebar.
