@@ -305,14 +305,26 @@ ADMIN_PASSWORD = st.secrets.get("ADMIN_PASSWORD", "admin123")
 # -----------------------------------------------------------------------------
 # STUDY / PARTICIPANT-BATCH CONFIGURATION
 # -----------------------------------------------------------------------------
-# Only these selected annotators receive formal main-study batches.
-# Replace the placeholder entries with the final selected annotator uNIDs.
-FORMAL_ANNOTATOR_IDS = [
-    "u1509787",
-    "u1276376",
-    "u1588664",  
-    "u1589107",  
-]
+# Configure how many of the 100 main-study prompts each formal annotator receives.
+# Rules enforced below:
+#   1. Exactly four formal annotators are configured.
+#   2. Counts must sum to 200 total annotations.
+#   3. No annotator can receive more than 100 prompts.
+#   4. Every main-study prompt is assigned to exactly two DIFFERENT annotators.
+#
+# Example below means:
+#   - u1509787 gets all 100 prompts.
+#   - u1276376 gets 0 main-study prompts for now.
+#   - u1588664 and u1589107 each get 50 prompts.
+# The 50-prompt assignments are non-overlapping, so every prompt has two annotators.
+ANNOTATOR_PROMPT_COUNTS = {
+    "u1589107": 100,
+    "u1276376": 0,
+    "u1588664": 50,
+    "u1509787": 50,
+}
+
+FORMAL_ANNOTATOR_IDS = list(ANNOTATOR_PROMPT_COUNTS.keys())
 FORMAL_ANNOTATOR_ID_SET = set(FORMAL_ANNOTATOR_IDS)
 
 # Anyone with a correctly formatted University of Utah uNID can access the pilot.
@@ -328,100 +340,244 @@ def normalize_unid(value: str) -> str | None:
 
     return unid
 
+
 PILOT_SIZE = 8
 MAIN_STUDY_SIZE = 100
+REQUIRED_ANNOTATIONS_PER_PROMPT = 2
+REQUIRED_TOTAL_MAIN_ANNOTATIONS = (
+    MAIN_STUDY_SIZE * REQUIRED_ANNOTATIONS_PER_PROMPT
+)
 
-# Each participant receives exactly 50 main-study prompts:
-# one personal batch of 8 prompts and six personal batches of 7 prompts.
-PARTICIPANT_BATCH_SIZES = [8] + [7] * 6
-TOTAL_PARTICIPANT_BATCHES = len(PARTICIPANT_BATCH_SIZES)
-assert sum(PARTICIPANT_BATCH_SIZES) == 50
 
-# Pilot is always available.
-# Release personal main-study batches by adding their numbers here.
-# Examples:
-#   set()             -> pilot only
-#   {1}               -> pilot + personal batch 1
-#   {1, 2, 3}         -> pilot + personal batches 1-3
-#   set(range(1, 8))  -> pilot + all seven personal batches
-RELEASED_PARTICIPANT_BATCHES = set()
-
-# Optional reassignment rules. Leave this empty during the pilot unless needed.
-# Each rule transfers only unfinished prompts from one participant batch.
-# Candidate replacements are tried in order. A candidate is skipped when they
-# are already assigned to, or have already annotated, that message.
-#
-# Example:
-# REASSIGNMENT_RULES = [
-#     {
-#         "reassignment_id": "r1",
-#         "from_annotator": "1",
-#         "participant_batch_id": 3,
-#         "to_annotators": ["2", "u6045151", "u1655162"],
-#     }
-# ]
-REASSIGNMENT_RULES = []
-# REASSIGNMENT_RULES = [
-#     {
-#         "reassignment_id": "r1",
-#         "from_annotator": "u6045151",
-#         "participant_batch_id": 1,
-#         "to_annotators": [
-#             "2",
-#             "1",
-#             "u1655162",
-#         ],
-#     }
-# ]
-
-def build_balanced_main_pairs():
-    """Return 100 annotator pairs with exactly 50 assignments per annotator."""
+def validate_assignment_configuration() -> None:
+    """Fail early when the configured annotation counts cannot satisfy the study."""
     if len(FORMAL_ANNOTATOR_IDS) != 4:
         raise ValueError(
-            "Exactly four formal annotator uNIDs are required before main-study "
-            "assignments can be generated. Update FORMAL_ANNOTATOR_IDS."
+            "Exactly four formal annotators must be configured in "
+            "ANNOTATOR_PROMPT_COUNTS."
         )
 
-    a, b, c, d = FORMAL_ANNOTATOR_IDS
+    if len(FORMAL_ANNOTATOR_ID_SET) != len(FORMAL_ANNOTATOR_IDS):
+        raise ValueError("Formal annotator uNIDs must be unique.")
 
-    all_six_pairs = [
-        (a, b),
-        (a, c),
-        (a, d),
-        (b, c),
-        (b, d),
-        (c, d),
+    invalid_ids = [
+        annotator_id
+        for annotator_id in FORMAL_ANNOTATOR_IDS
+        if not UNID_PATTERN.fullmatch(str(annotator_id))
     ]
+    if invalid_ids:
+        raise ValueError(f"Invalid formal annotator uNIDs: {invalid_ids}")
 
-    final_four_pairs = [
-        (a, b),
-        (c, d),
-        (a, c),
-        (b, d),
-    ]
+    invalid_counts = {
+        annotator_id: count
+        for annotator_id, count in ANNOTATOR_PROMPT_COUNTS.items()
+        if not isinstance(count, int) or count < 0 or count > MAIN_STUDY_SIZE
+    }
+    if invalid_counts:
+        raise ValueError(
+            "Each prompt count must be an integer between 0 and "
+            f"{MAIN_STUDY_SIZE}: {invalid_counts}"
+        )
 
-    pairs = all_six_pairs * 16 + final_four_pairs
-    assert len(pairs) == MAIN_STUDY_SIZE
+    configured_total = sum(ANNOTATOR_PROMPT_COUNTS.values())
+    if configured_total != REQUIRED_TOTAL_MAIN_ANNOTATIONS:
+        raise ValueError(
+            "ANNOTATOR_PROMPT_COUNTS must sum to exactly "
+            f"{REQUIRED_TOTAL_MAIN_ANNOTATIONS} annotations, but currently sums "
+            f"to {configured_total}."
+        )
 
-    counts = {annotator: 0 for annotator in FORMAL_ANNOTATOR_IDS}
+
+validate_assignment_configuration()
+
+
+def build_prompt_annotator_pairs() -> list[tuple[str, str]]:
+    """
+    Build one pair of distinct annotators for each of the 100 main-study prompts.
+
+    The requested count for every annotator is respected exactly. At each prompt,
+    the two annotators with the largest remaining assignment counts are selected.
+    Ties follow FORMAL_ANNOTATOR_IDS order, making the assignment deterministic.
+
+    For the configuration 100 / 0 / 50 / 50, this naturally produces:
+      - the 100-count annotator on every prompt;
+      - the two 50-count annotators on disjoint halves of the prompts.
+    """
+    remaining = dict(ANNOTATOR_PROMPT_COUNTS)
+    order = {annotator_id: idx for idx, annotator_id in enumerate(FORMAL_ANNOTATOR_IDS)}
+    pairs: list[tuple[str, str]] = []
+
+    for prompt_idx in range(MAIN_STUDY_SIZE):
+        prompts_left = MAIN_STUDY_SIZE - prompt_idx
+
+        # A participant cannot still need more assignments than there are prompts left.
+        impossible = {
+            annotator_id: count
+            for annotator_id, count in remaining.items()
+            if count > prompts_left
+        }
+        if impossible:
+            raise ValueError(
+                "The configured prompt counts cannot be distributed with two distinct "
+                f"annotators per prompt. Remaining counts: {remaining}"
+            )
+
+        candidates = [
+            annotator_id
+            for annotator_id in FORMAL_ANNOTATOR_IDS
+            if remaining[annotator_id] > 0
+        ]
+        candidates.sort(
+            key=lambda annotator_id: (
+                -remaining[annotator_id],
+                order[annotator_id],
+            )
+        )
+
+        if len(candidates) < REQUIRED_ANNOTATIONS_PER_PROMPT:
+            raise ValueError(
+                "Could not assign two distinct annotators to every prompt. "
+                f"Remaining counts: {remaining}"
+            )
+
+        selected = candidates[:REQUIRED_ANNOTATIONS_PER_PROMPT]
+        pairs.append((selected[0], selected[1]))
+
+        for annotator_id in selected:
+            remaining[annotator_id] -= 1
+
+    if any(remaining.values()):
+        raise ValueError(
+            "Assignment generation did not consume all configured counts: "
+            f"{remaining}"
+        )
+
+    generated_counts = {annotator_id: 0 for annotator_id in FORMAL_ANNOTATOR_IDS}
     for pair in pairs:
-        for annotator in pair:
-            counts[annotator] += 1
+        if len(set(pair)) != REQUIRED_ANNOTATIONS_PER_PROMPT:
+            raise ValueError(f"Prompt received duplicate annotators: {pair}")
+        for annotator_id in pair:
+            generated_counts[annotator_id] += 1
 
-    assert all(count == 50 for count in counts.values())
+    if generated_counts != ANNOTATOR_PROMPT_COUNTS:
+        raise ValueError(
+            "Generated assignments do not match ANNOTATOR_PROMPT_COUNTS. "
+            f"Expected {ANNOTATOR_PROMPT_COUNTS}, got {generated_counts}."
+        )
+
+    if len(pairs) != MAIN_STUDY_SIZE:
+        raise ValueError(
+            f"Expected {MAIN_STUDY_SIZE} prompt pairs, got {len(pairs)}."
+        )
+
     return pairs
 
 
-MAIN_ASSIGNMENT_PAIRS = build_balanced_main_pairs()
+MAIN_ASSIGNMENT_PAIRS = build_prompt_annotator_pairs()
 
 
-def assign_personal_batches(main_df, main_pairs):
+def build_batch_sizes(prompt_count: int) -> list[int]:
+    """Split an annotator's assigned prompts into batches of roughly 7-8 prompts."""
+    prompt_count = int(prompt_count)
+
+    if prompt_count <= 0:
+        return []
+
+    # Use the fewest batches possible while keeping each batch at no more than 8.
+    number_of_batches = (prompt_count + 7) // 8
+    base_size, remainder = divmod(prompt_count, number_of_batches)
+
+    # Put the slightly larger batches first. For example:
+    #   50  -> [8, 7, 7, 7, 7, 7, 7]
+    #   100 -> nine 8s + four 7s (13 batches total)
+    return [base_size + 1] * remainder + [base_size] * (number_of_batches - remainder)
+
+
+def get_participant_batch_sizes(annotator_id: str) -> list[int]:
+    """Return the configured main-study batch sizes for one formal annotator."""
+    annotator_id = str(annotator_id).strip().lower()
+    prompt_count = int(ANNOTATOR_PROMPT_COUNTS.get(annotator_id, 0))
+    return build_batch_sizes(prompt_count)
+
+
+def get_total_participant_batches(annotator_id: str) -> int:
+    """Return how many main-study batches the annotator has."""
+    return len(get_participant_batch_sizes(annotator_id))
+
+
+# Access / release policy. These are intentionally independent controls.
+#
+# PILOT_ACCESS:
+#   Annotators listed here can access the 8-prompt pilot.
+#
+# MAIN_RELEASED:
+#   Annotators listed here can access ALL main-study prompts assigned to them
+#   by ANNOTATOR_PROMPT_COUNTS. Main-study access is NOT automatically released
+#   when the pilot is completed; you control release explicitly here.
+#
+# Example current state:
+#   - u1509787: pilot + 100 main prompts
+#   - u1276376: no pilot and no main prompts
+#   - u1588664: pilot only; their 50 main prompts are still locked
+#   - u1589107: pilot only; their 50 main prompts are still locked
+PILOT_ACCESS = {
+    "u1509787",
+    "u1588664",
+    "u1589107",
+}
+
+MAIN_RELEASED = {
+    "u1589107",
+}
+
+
+def validate_access_configuration() -> None:
+    """Validate pilot and main-study access settings."""
+    unknown_pilot = set(PILOT_ACCESS) - FORMAL_ANNOTATOR_ID_SET
+    if unknown_pilot:
+        raise ValueError(
+            f"PILOT_ACCESS contains unknown formal annotators: {sorted(unknown_pilot)}"
+        )
+
+    unknown_main = set(MAIN_RELEASED) - FORMAL_ANNOTATOR_ID_SET
+    if unknown_main:
+        raise ValueError(
+            f"MAIN_RELEASED contains unknown formal annotators: {sorted(unknown_main)}"
+        )
+
+
+validate_access_configuration()
+
+
+def get_released_participant_batches(annotator_id: str) -> set[int]:
+    """Return explicitly released main-study batches for one annotator."""
+    annotator_id = str(annotator_id).strip().lower()
+
+    if annotator_id not in FORMAL_ANNOTATOR_ID_SET:
+        return set()
+
+    if annotator_id not in MAIN_RELEASED:
+        return set()
+
+    total_batches = get_total_participant_batches(annotator_id)
+    return set(range(1, total_batches + 1))
+
+
+# Optional reassignment rules. Leave this empty unless needed.
+# Each rule transfers only unfinished prompts from one participant batch.
+# Candidate replacements are tried in order. A candidate is skipped when they
+# are already assigned to, or have already annotated, that message.
+REASSIGNMENT_RULES = []
+
+
+def assign_personal_batches(main_df):
     """
-    Create annotator-specific batches.
+    Create configurable annotator-specific assignments and personal batches.
 
-    Each annotator receives exactly 50 assigned prompts, divided into seven
-    personal batches sized [8, 7, 7, 7, 7, 7, 7]. Messages are balanced by
-    character length separately for each annotator.
+    Every main-study prompt is assigned to exactly two different formal annotators.
+    Each annotator receives exactly the number of prompts configured in
+    ANNOTATOR_PROMPT_COUNTS. Their prompts are then divided into roughly 7-8 item
+    batches, balanced by message character length.
     """
     if len(main_df) != MAIN_STUDY_SIZE:
         raise ValueError(
@@ -442,18 +598,26 @@ def assign_personal_batches(main_df, main_pairs):
     for annotator_id in FORMAL_ANNOTATOR_IDS:
         assigned_indices = [
             main_idx
-            for main_idx, pair in enumerate(main_pairs)
+            for main_idx, pair in enumerate(MAIN_ASSIGNMENT_PAIRS)
             if annotator_id in pair
         ]
 
-        if len(assigned_indices) != 50:
+        expected_count = ANNOTATOR_PROMPT_COUNTS[annotator_id]
+        if len(assigned_indices) != expected_count:
             raise ValueError(
-                f"Annotator {annotator_id} has {len(assigned_indices)} main "
-                "assignments instead of 50."
+                f"Annotator {annotator_id} has {len(assigned_indices)} generated "
+                f"assignments instead of configured count {expected_count}."
             )
 
-        batch_total_lengths = [0] * TOTAL_PARTICIPANT_BATCHES
-        batch_counts = [0] * TOTAL_PARTICIPANT_BATCHES
+        if not assigned_indices:
+            continue
+
+        participant_batch_sizes = get_participant_batch_sizes(annotator_id)
+        total_participant_batches = len(participant_batch_sizes)
+        released_batches = get_released_participant_batches(annotator_id)
+
+        batch_total_lengths = [0] * total_participant_batches
+        batch_counts = [0] * total_participant_batches
         batch_for_index = {}
 
         longest_first = sorted(
@@ -464,7 +628,7 @@ def assign_personal_batches(main_df, main_pairs):
         for main_idx in longest_first:
             eligible_batches = [
                 batch_idx
-                for batch_idx, target_size in enumerate(PARTICIPANT_BATCH_SIZES)
+                for batch_idx, target_size in enumerate(participant_batch_sizes)
                 if batch_counts[batch_idx] < target_size
             ]
 
@@ -481,19 +645,22 @@ def assign_personal_batches(main_df, main_pairs):
             batch_counts[selected_batch] += 1
             batch_total_lengths[selected_batch] += message_lengths[main_idx]
 
-        assert batch_counts == PARTICIPANT_BATCH_SIZES
+        if batch_counts != participant_batch_sizes:
+            raise ValueError(
+                f"Batch construction failed for {annotator_id}. Expected "
+                f"{participant_batch_sizes}, got {batch_counts}."
+            )
 
         for main_idx in assigned_indices:
+            participant_batch_id = int(batch_for_index[main_idx])
+
             assignments.append(
                 {
                     "message_id": str(main_df.iloc[main_idx]["message_id"]),
                     "annotator_id": str(annotator_id),
                     "study_phase": "main",
-                    "participant_batch_id": int(batch_for_index[main_idx]),
-                    "is_released": (
-                        batch_for_index[main_idx]
-                        in RELEASED_PARTICIPANT_BATCHES
-                    ),
+                    "participant_batch_id": participant_batch_id,
+                    "is_released": participant_batch_id in released_batches,
                     "original_annotator_id": str(annotator_id),
                     "is_reassigned": False,
                     "reassignment_id": "",
@@ -501,8 +668,24 @@ def assign_personal_batches(main_df, main_pairs):
                 }
             )
 
-    return assignments
+    # Final study-level safety checks.
+    assignments_df = pd.DataFrame(assignments)
 
+    if len(assignments_df) != REQUIRED_TOTAL_MAIN_ANNOTATIONS:
+        raise ValueError(
+            f"Expected {REQUIRED_TOTAL_MAIN_ANNOTATIONS} main-study assignments, "
+            f"got {len(assignments_df)}."
+        )
+
+    counts_by_message = assignments_df.groupby("message_id")["annotator_id"].nunique()
+    if len(counts_by_message) != MAIN_STUDY_SIZE or not (
+        counts_by_message == REQUIRED_ANNOTATIONS_PER_PROMPT
+    ).all():
+        raise ValueError(
+            "Every main-study message must be assigned to exactly two distinct annotators."
+        )
+
+    return assignments
 
 def prepare_study(messages_df):
     """
@@ -513,6 +696,8 @@ def prepare_study(messages_df):
       rows 8-107 = main study
 
     Pilot assignments are added dynamically after a participant logs in.
+    Main-study assignments follow ANNOTATOR_PROMPT_COUNTS, with exactly
+    two distinct annotators assigned to every main-study message.
     """
     expected = PILOT_SIZE + MAIN_STUDY_SIZE
 
@@ -529,11 +714,7 @@ def prepare_study(messages_df):
     study_messages.loc[: PILOT_SIZE - 1, "study_phase"] = "pilot"
 
     main_df = study_messages.iloc[PILOT_SIZE:].copy().reset_index(drop=True)
-
-    assignment_rows = assign_personal_batches(
-        main_df,
-        MAIN_ASSIGNMENT_PAIRS,
-    )
+    assignment_rows = assign_personal_batches(main_df)
 
     return study_messages, assignment_rows
 
@@ -544,11 +725,15 @@ def add_pilot_assignments(
     annotator_id: str,
 ) -> pd.DataFrame:
     """
-    Give every valid uNID access to all pilot messages.
+    Give pilot access only to annotators explicitly listed in PILOT_ACCESS.
 
-    Formal main-study assignments remain limited to FORMAL_ANNOTATOR_IDS.
+    Main-study assignments and release are controlled separately.
     """
     updated = assignments_df.copy()
+    annotator_id = str(annotator_id).strip().lower()
+
+    if annotator_id not in PILOT_ACCESS:
+        return updated
 
     pilot_messages = messages_df[
         messages_df["study_phase"] == "pilot"
@@ -626,10 +811,12 @@ def apply_reassignments(assignments_df, annotations_df):
             raise ValueError("Every reassignment rule needs a reassignment_id.")
         if from_annotator not in FORMAL_ANNOTATOR_ID_SET:
             raise ValueError(f"Unknown original annotator: {from_annotator}")
-        if participant_batch_id not in range(1, TOTAL_PARTICIPANT_BATCHES + 1):
+        source_total_batches = get_total_participant_batches(from_annotator)
+        if participant_batch_id not in range(1, source_total_batches + 1):
             raise ValueError(
-                f"Invalid participant_batch_id {participant_batch_id} "
-                f"for reassignment {reassignment_id}."
+                f"Invalid participant_batch_id {participant_batch_id} for "
+                f"annotator {from_annotator}; they have {source_total_batches} "
+                f"main-study batches. Reassignment: {reassignment_id}."
             )
         if not candidates:
             raise ValueError(
@@ -838,15 +1025,20 @@ with st.sidebar:
             st.session_state["verified_annotator"] = annotator_id
             st.success(f"uNID: {annotator_id}")
 
-            if annotator_id in FORMAL_ANNOTATOR_ID_SET:
+            has_pilot_access = annotator_id in PILOT_ACCESS
+            has_main_access = annotator_id in MAIN_RELEASED
+
+            if has_pilot_access and has_main_access:
                 st.caption(
                     "You have access to the pilot and your currently released "
                     "formal annotation batches."
                 )
+            elif has_pilot_access:
+                st.caption("You currently have access to the pilot testing batch.")
+            elif has_main_access:
+                st.caption("You currently have access to your released formal annotation batches.")
             else:
-                st.caption(
-                    "You currently have access to the pilot testing batch."
-                )
+                st.caption("No annotation batches are currently released for this uNID.")
 
         else:
             st.warning(
@@ -962,7 +1154,7 @@ if mode == "Annotation":
                 "batch_id": int(batch_id),
                 "label": (
                     f"Your main-study batch {int(batch_id)} "
-                    f"of {TOTAL_PARTICIPANT_BATCHES}"
+                    f"of {get_total_participant_batches(str(annotator_id))}"
                 ),
                 "rows": batch_rows,
             }
@@ -1023,13 +1215,13 @@ if mode == "Annotation":
     )
 
     released_formal_batches = (
-        len(RELEASED_PARTICIPANT_BATCHES)
+        len(get_released_participant_batches(str(annotator_id)))
         if is_formal_annotator
         else 0
     )
 
     total_formal_batches = (
-        TOTAL_PARTICIPANT_BATCHES
+        get_total_participant_batches(str(annotator_id))
         if is_formal_annotator
         else 0
     )
@@ -1142,9 +1334,10 @@ else:
     if review_annotator == "All annotators":
         review_options = ["All messages", "Pilot"]
     else:
+        review_total_batches = get_total_participant_batches(str(review_annotator))
         review_options = ["All assigned", "Pilot"] + [
             f"Personal batch {batch_id}"
-            for batch_id in range(1, TOTAL_PARTICIPANT_BATCHES + 1)
+            for batch_id in range(1, review_total_batches + 1)
         ]
 
     selected_review_batch = st.sidebar.selectbox(
@@ -1252,7 +1445,8 @@ elif bool(current.get("is_reassigned", False)):
 else:
     phase_label = (
         f"Your main-study batch "
-        f"{int(current['participant_batch_id'])} of {TOTAL_PARTICIPANT_BATCHES}"
+        f"{int(current['participant_batch_id'])} of "
+        f"{get_total_participant_batches(str(annotator_id))}"
     )
 
 st.caption(phase_label)
